@@ -88,7 +88,7 @@
 <meta property="og:url" content="http://yoursite.com/2018/06/20/浅谈Java垃圾回收与JVM/index.html">
 <meta property="og:site_name" content="Hill&#39;s Notes">
 <meta property="og:description" content="简介Java与JVM 为什么要有JVM。在程序里，没有一件事情是抽象出来一层解决不了的，如果有那就抽象出两层。   大家都知道，Java是一门跨平台的语言，有那么一个非常经典梗—一次编写，处处异常(一次编写，处处运行)。java是通过JVM实现在不同平台上运行的，无论你是Windows，Linux还是其他什么系统，只要你能装上对应的支持JVM，就可以把代码拿过来直接使用。不需要做任何修改（当你没有">
-<meta property="og:image" content="http://yoursite.com/img/jvm/jvm-01.png">
+<meta property="og:image" content="http://yoursite.com/img/JVM/jvm-01.png">
 <meta property="og:image" content="http://yoursite.com/img/JVM/gc_root.png">
 <meta property="og:image" content="http://yoursite.com/img/JVM/jvm-01.jpg">
 <meta property="og:image" content="http://yoursite.com/img/JVM/jvm-02.jpg">
@@ -118,11 +118,11 @@
 <meta property="og:image" content="http://yoursite.com/img/JVM/jmap-final.png">
 <meta property="og:image" content="http://yoursite.com/img/JVM/jmap-dump">
 <meta property="og:image" content="http://yoursite.com/img/JVM/jhat-brower.png">
-<meta property="og:updated_time" content="2018-07-17T15:51:38.468Z">
+<meta property="og:updated_time" content="2018-07-19T15:32:16.044Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="浅谈Java垃圾回收与JVM">
 <meta name="twitter:description" content="简介Java与JVM 为什么要有JVM。在程序里，没有一件事情是抽象出来一层解决不了的，如果有那就抽象出两层。   大家都知道，Java是一门跨平台的语言，有那么一个非常经典梗—一次编写，处处异常(一次编写，处处运行)。java是通过JVM实现在不同平台上运行的，无论你是Windows，Linux还是其他什么系统，只要你能装上对应的支持JVM，就可以把代码拿过来直接使用。不需要做任何修改（当你没有">
-<meta name="twitter:image" content="http://yoursite.com/img/jvm/jvm-01.png">
+<meta name="twitter:image" content="http://yoursite.com/img/JVM/jvm-01.png">
 
 
 
@@ -431,7 +431,7 @@
 <li><p>我们都知道高级语言一般分两种，一种是编译型语言，一种是解释型语言。编译型语言就是常用的C、C++，Basic等他们都是编译语言，使用的时候都是先编译成目标文件（也就是.o和.obj文件），然后再去链接相应的类库，的工具库，然后才能运行，（做了一大桌子菜，都做好了，才能开始吃饭；菜就是代码，人就是CPU；<strong>也就是代码在运行之前就已经确定了，不能在改变</strong>）。他们编译之后都变成了机器码，不同的机器上对机器码（就是CPU执行的指令，就是一大堆0和1）的要求可能也不同，比如32位机和64位机，windows系统和linux系统，所以可能在别的机器上完美运行的代码在其他机器上就会有问题。所以编译型语言在不同的平台上使用不同的编译器重新编译一遍才能运行而解释型语言就不一样，他是通过解释器，解释给系统底层，一般没有编译的过程，在运行时候解释给操作系统（这个过程就像吃火锅，你需要什么就在里面加什么根据自己的喜好，而且还可以在这个过程中在进行二次处理，比如说反射的一些应用。也就是程序会在运行时被解释。我们可以在解释之前做一些操作）；这类语言有PHP，JavaScript，Ruby等等一般他们都是不需要编译。而java是介于这两者之间的一种语言。属于混合型。因为java有编译的过程（前期编译，后期编译），大多数时候java是被编译成字节码文件也就是.class文件。但是有一些常用或者热点代码也会直接编译成本地代码（机器码）直接被使用（详情可以看看JIT）。所以java属于混合型，这类型的语言还有C#。他们不是直接把代码交给解释器直接去执行，而是先编译成一个中间文件，然后再把中间文件交给解释器去处理。</p>
 </li>
 <li><p>Java与C++之间有一堵内存动态分配和垃圾回收的技术所围城的“高墙”，墙外的人想进去，墙里的人却想出来。对与C和C++的程序员他们都是自己去管理内存（malloc和free）否则就会产生内存泄漏和溢出的问题。<strong>内存泄漏指的是本应该回收（不再使用）的内存对象无法被系统回收的现象；</strong>在C++和C中都是程序猿手动申请和释放，而java是通过JVM实现内存的分配和回收，可以减少内存的泄漏，但是也不能完全避免。java使用的是可达性算法，来回收那些没有使用的也就是不可达的对象。但是<strong>被使用对象引用的无用对象却不能被回收；</strong>内存泄漏一般都是情况有，单例模式的使用，类里面的静态变量，Threadlocal弱引用key问题等等；<strong>内存溢出是指当对象分配内存时，可用内存小于对象的内存，也就是内存不足现象</strong>。两者也是有一定关联也就是如果内存经常泄漏导致可用内存越来越少，最后会导致内存溢出。 同样内存溢出也可能会导致安全问题，一般是缓冲区和栈内存，因为他们都是连续的内存，所以黑客可以通过你内存的溢出的位置去查找你栈中和缓存区的数据，然后修改数据。不过程序猿把控制权交给了JVM，一旦出现内存泄漏和内存溢出问题就会很难排查。我之前有一篇文章写java内存模型的，可以先了解一下JVM内存。</p>
-<p><img src="/img/jvm/jvm-01.png" alt=""></p>
+<p><img src="/img/JVM/jvm-01.png" alt=""></p>
 </li>
 </ul>
 <h4 id="JVM内存分配策略"><a href="#JVM内存分配策略" class="headerlink" title="JVM内存分配策略"></a>JVM内存分配策略</h4><ul>
