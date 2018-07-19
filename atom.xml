@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://yoursite.com/"/>
-  <updated>2018-07-19T15:32:16.044Z</updated>
+  <updated>2018-07-19T15:36:45.137Z</updated>
   <id>http://yoursite.com/</id>
   
   <author>
@@ -20,7 +20,7 @@
     <link href="http://yoursite.com/2018/06/20/%E6%B5%85%E8%B0%88Java%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E4%B8%8EJVM/"/>
     <id>http://yoursite.com/2018/06/20/浅谈Java垃圾回收与JVM/</id>
     <published>2018-06-20T13:31:31.000Z</published>
-    <updated>2018-07-19T15:32:16.044Z</updated>
+    <updated>2018-07-19T15:36:45.137Z</updated>
     
     <content type="html"><![CDATA[<h4 id="简介Java与JVM"><a href="#简介Java与JVM" class="headerlink" title="简介Java与JVM"></a>简介Java与JVM</h4><ul>
 <li>为什么要有JVM。在程序里，没有一件事情是抽象出来一层解决不了的，如果有那就抽象出两层。</li>
@@ -37,8 +37,7 @@
 <h4 id="JVM内存分配策略"><a href="#JVM内存分配策略" class="headerlink" title="JVM内存分配策略"></a>JVM内存分配策略</h4><ul>
 <li>JAVA虚拟机里面各个区域都装的什么，难道是shit吗？</li>
 </ul>
-<ul>
-<li><h5 id="回顾"><a href="#回顾" class="headerlink" title="回顾"></a>回顾</h5><p>java运行时内存是由，java堆，虚拟机栈，程序计数器，方法区（现在是metadata），本地方法栈和运行常量池组成。还有一部分是直接内存，直接内存（Direct Memory）并不是虚拟机运行时数据区的一部分，也不是java虚拟机规范中定义的内存区域，就是JVM以外的机器内存，比如，你有4G的内存，JVM占用了1G，则其余的3G就是直接内存。这部分被频繁的使用，所以也会出现OutOfMemory异常。在Java NIO中引入基于通道和缓冲区（Buffer）的I/O方式，它可以使用Native函数直接分配堆外内存也就是直接内存，（也就是JVM调用系统方法，把数据读取到内存中，而这一块内存不在JVM的堆内存中heap Memory。JVM在操作系统里其实就是一个进程）然后通过一个存储在java堆中的DirectByteBuffer对象作为这块内存的引用进行操作。这样能在一些情况下显著提高性能，因为避免了在java堆和Native堆中来回的复制。</p>
+<h5 id="回顾"><a href="#回顾" class="headerlink" title="回顾"></a>回顾</h5><p>java运行时内存是由，java堆，虚拟机栈，程序计数器，方法区（现在是metadata），本地方法栈和运行常量池组成。还有一部分是直接内存，直接内存（Direct Memory）并不是虚拟机运行时数据区的一部分，也不是java虚拟机规范中定义的内存区域，就是JVM以外的机器内存，比如，你有4G的内存，JVM占用了1G，则其余的3G就是直接内存。这部分被频繁的使用，所以也会出现OutOfMemory异常。在Java NIO中引入基于通道和缓冲区（Buffer）的I/O方式，它可以使用Native函数直接分配堆外内存也就是直接内存，（也就是JVM调用系统方法，把数据读取到内存中，而这一块内存不在JVM的堆内存中heap Memory。JVM在操作系统里其实就是一个进程）然后通过一个存储在java堆中的DirectByteBuffer对象作为这块内存的引用进行操作。这样能在一些情况下显著提高性能，因为避免了在java堆和Native堆中来回的复制。</p>
 <h5 id="对象与引用"><a href="#对象与引用" class="headerlink" title="对象与引用"></a>对象与引用</h5><p><strong>什么是对象</strong>（对象是程序运行时的实体；它的状态存储在 fields (也就是变量)行为是通过方法 (method) 实现的；方法上操作对象的内部的状态方法是对象对对象的通信的主要手段）。</p>
 <p>肯定有人说对象就是女朋友啊。没错如果你没对象可以尝试new一个出来。放心你在怎么new都不会有对象（女朋友）。开个玩笑，对象就是程序运行时用来存储数据的一个集合体(实体)，他包含你声明类（class）中有的变量（可能这些变量都是空）和一些操作变量的方法，一般java都是通过方法来操作属性，大多树情况下对象存在java堆中（也有可能存在堆上，这个要进行逃逸分析），通过引用去找到这个对象对象是程序运行时的实体。java是一门面向对象语言(Object-oriented programming OOP)。面向对象语言是对以前<strong>C的面向过程</strong>进行封装，过程都是通过函数来实现，也就是一个程序有很多函数。但是对象把函数和变量封装成一个整体，通过操作对象来实现对业务的处理（对数据的加工）或者实现功能，也可以说<strong>对象是对函数和变量的抽象</strong>。增加了代码的可复用性和灵活性，但是也增加了对象之间的关系比如说继承和多态（设计模式，增加代码的的复用性的设计）。其实函数式编程可以更好的减少代码（一个功能，代码写的越多bug越多，维护成本越高，尽量少写bug）。</p>
 <p><strong>什么是引用</strong>。（引用是数据存储于内存或存储设备中的地址。因此，引用亦常被称为该数据的指针或地址）</p>
@@ -46,8 +45,6 @@
 <figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">Student s = <span class="keyword">new</span> Student(); <span class="comment">//创建一个新的Student对象</span></div></pre></td></tr></table></figure>
 <p>也就是把new 出来的 Student对象在java堆中的地址给s。之后我们操作这个新对象，都通过引用s。因为s就像一把钥匙能打开这个java堆中存储这个对象的大门，它可以操作Student对象的方法和变量，大多数时候我们都是这样操作对象。同样引用和基本类型都在栈上存储。但是String这个类型比较特殊，他的值一般都在堆上存储（直接赋值的String 一般都是存在<strong>字符串常量池（ Strings Pool）</strong>在堆里，这样方便管理字符串内容相同的String对象，他们都指向一个字符串，而不是多个。new出来的String对象除外，不在池子里），这个和引用类型很类似，它也只存一个堆上的地址，所以这些类型在初始化时候为null，而其他类型会报错，同时String可以new出来。</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">String s=<span class="keyword">null</span>; <span class="comment">//这样不会报错。</span></div><div class="line"><span class="keyword">int</span> i=<span class="keyword">null</span>;  <span class="comment">//这样会报错编译不通过。</span></div><div class="line">String k=<span class="keyword">new</span> String(<span class="string">"this is hill blog"</span>); <span class="comment">//String 是可以new出来的 k指向的值也是存在堆上面的</span></div><div class="line">Integer j=<span class="keyword">new</span> Integer(<span class="number">1</span>); <span class="comment">//int 是不能这样new 的但是int的包装类Integer可以。j指向的对象也是存在堆上面的</span></div><div class="line">String o=<span class="string">"hello hill"</span>; <span class="comment">//这个字符串是存在字符串常量池中的。o指向的值也是存在堆上面的</span></div><div class="line"><span class="keyword">int</span> p=<span class="number">1</span>； <span class="comment">//这个p是存在栈上的，一般情况</span></div></pre></td></tr></table></figure>
-</li>
-</ul>
 <h5 id="强引用，软引用，弱引用，虚引用，ReferenceQueue。"><a href="#强引用，软引用，弱引用，虚引用，ReferenceQueue。" class="headerlink" title="强引用，软引用，弱引用，虚引用，ReferenceQueue。"></a>强引用，软引用，弱引用，虚引用，ReferenceQueue。</h5><p>在JDK1.2以后，java对引用的概念进行的扩充，将引用分为强引用(Strong Reference)，软引用(Soft Reference)，弱引用(Weak Reference)，虚引用(Phantom Reference)。这四种，引用强度分别减弱。肯定有人会问搞这么多东西干嘛，一种难道不够用吗。<strong>这些引用为垃圾回收提供了灵活的方式</strong>，我知道JVM垃圾回收不是通过引用技术的方式，而是通过可达性算法来实现，也就是这个对象有没有被引用。就会被定义为垃圾然后把他回收掉，但是有虚引用和弱引用，就可以在回收的时候不用计算一遍，<strong>减少Stop-The-World的时间</strong>，可以直接判断为垃圾或者回收掉。</p>
 <p>强引用：强引用就是代码中普遍存在的引用例如<code>Object obj=new Object();</code> 这类的引用。这里的obj是强引用。只要强引用还存在，垃圾回收器就不会回收该对象。当<code>obj=null;</code>的时候强引用的值消失，<strong>也就是该对象不可达。没有任何引用和可以操作该对象，表示该引用可以被回收</strong>。有时候强引用会显得“过强”，比如实现一个图像缓存，缓存中保存了对图像的引用，当图像不再使用时，如果缓存中还保存了对该图像的强引用，图像就不会被垃圾回收，需要手动断开缓存中的引用。</p>
 <p>软引用：用来描述一些还有用但是非必需的对象。对于软引用关联着的对象<strong>，只有在内存不足的时候JVM才会回收该对象</strong>。因此，这一点可以很好地用来解决OOM的问题，并且这个<strong>特性很适合用来实现缓存</strong>：比如网页缓存、图片缓存等。</p>
@@ -254,7 +251,6 @@
 <h4 id="其他杂项"><a href="#其他杂项" class="headerlink" title="其他杂项"></a>其他杂项</h4><ul>
 <li>CCSU的由来</li>
 </ul>
-<p>著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。</p>
 <p>在Java8以前，有一个选项是UseCompressedOops。所谓OOPS是指“ordinary object pointers“，就是原始指针。Java Runtime可以用这个指针直接访问指针对应的内存，做相应的操作（比如发起GC时做copy and sweep）。64bit的JVM出现后，OOPS的尺寸也变成了64bit，比之前的大了一倍。这会引入性能损耗，占的内存double了，并且同尺寸的CPU Cache要少存一倍的OOPS。于是就有了UseCompressedOops这个选项。打开后，OOPS变成了32bit。但32bit的base是8，所以能引用的空间是32GB——这远大于目前经常给jvm进程内存分配的空间。<strong>一般建议不要给JVM太大的内存，因为堆（Heap）太大，GC停顿实在是太久了。很多开发者喜欢在大内存机器上开多个JVM进程</strong>，每个给最大8G以下的内存。从JDK6_u23开始UseCompressedOops被默认打开了。因此既能享受64bit带来的好处，又避免了64bit带来的性能损耗<strong>。如果你有机会使用超过32G的堆内存，记得把这个选项关了</strong>。到了Java8，永久代被干掉了，由了MetaDataSpace的概念，存储jvm中的元数据，包括byte code，class等信息。Java8在UseCompressedOops之外，额外增加了一个新选项叫做UseCompressedClassPointer。这个选项打开后，class信息中的指针也用32bit的Compressed版本。而这些指针指向的空间被称作Compressed Class Space。默认大小是1G，但可以通过CompressedClassSpaceSize调整。如果你的java程序引用了太多的包，有可能会造成这个空间不够用，于是会看到java.lang.OutOfMemoryError: Compressed class space这时，一般调大CompreseedClassSpaceSize就可以了。</p>
 ]]></content>
     
