@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://yoursite.com/"/>
-  <updated>2018-07-19T15:36:45.137Z</updated>
+  <updated>2018-08-04T14:34:49.296Z</updated>
   <id>http://yoursite.com/</id>
   
   <author>
@@ -14,6 +14,55 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>网络代理</title>
+    <link href="http://yoursite.com/2018/08/05/%E7%BD%91%E7%BB%9C%E4%BB%A3%E7%90%86/"/>
+    <id>http://yoursite.com/2018/08/05/网络代理/</id>
+    <published>2018-08-05T01:21:08.000Z</published>
+    <updated>2018-08-04T14:34:49.296Z</updated>
+    
+    <content type="html"><![CDATA[<h4 id="什么是代理，网络代理，代理服务器"><a href="#什么是代理，网络代理，代理服务器" class="headerlink" title="什么是代理，网络代理，代理服务器"></a>什么是代理，网络代理，代理服务器</h4><p>代理（proxy）很容易理解就是<strong>代表处理</strong>，在生活中，有些事情就不是本人去完成，找一个人代你去完成，它是你代理人。把你的权利交给你的代理人，一般在这种在法律上比较常见，但是在计算机的世界里还好，经常会出现这种代理的现象，比如就有个设计模式叫代理模式。</p>
+<p>在网络上发出请求是客户端，接收请求的是服务器端。请求从客户端到服务器端会通过好多网络。然后到达服务器端，这个时候一般中间会有好多服务器帮你 转发请求，不是客户端直接去链接服务器端，他们就是代理服务器。而网络代理就是帮你转发的请求的过程，那些帮你转发的服务器就是代理服务器。它的工作主要在开放系统互联(OSI)模型的<strong>对话层</strong>。我上面所描述的代理也就是正向代理。</p>
+<h4 id="正向代理"><a href="#正向代理" class="headerlink" title="正向代理"></a>正向代理</h4><p>正向代理是一个位于客户端和目标服务器之间的代理服务器(中间服务器)。为了从原始服务器取得内容，客户端向代理服务器发送一个请求，并且指定目标服务器，之后代理向目标服务器转交并且将获得的内容返回给客户端。正向代理的情况下客户端必须要进行一些特别的设置才能使用。</p>
+<p><img src="/img/proxy/proxy-01.png" alt=""></p>
+<p>举个栗子：</p>
+<p>我是一个用户，我访问不了某网站（facebook）由于GFW（Great Fire Wall），但是我能访问一个代理服务器，这个代理服务器呢,他能访问那个我不能访问的网站，于是我先连上代理服务器,告诉他我需要那个无法访问网站的内容，代理服务器去取回来,然后返回给我。从网站的角度，只在代理服务器来取内容的时候有一次记录，有时候并不知道是用户的请求，也隐藏了用户的资料，这取决于代理告不告诉网站（facebook）。也就是可以在代理上做一些手脚，有人把代理机叫做跳板机。</p>
+<p>优点：</p>
+<p>1．突破自身IP访问限制：访问国外站点。教育网、169网等网络用户可以通过代理访问国外网站；或者访问一些单位或团体内部资源，如某大学FTP(前提是该代理地址在该资源 的允许访问范围之内)，使用教育网内地址段免费代理服务器，就可以用于对教育网开放的各类FTP下载上传，以及各类资料查询共享等服务。</p>
+<p>2、提高访问速度：通常代理服务器都设置一个较大的硬盘缓冲区，当有外界的信息通过时，同时也将其保存到缓冲区中，当其他用户再访问相同的信息时， 则直接由缓冲区中取出信息，传给用户，以提高访问速度。</p>
+<p>3、隐藏真实IP：上网者也可以通过这种方法隐藏自己的IP，免受攻击</p>
+<p>4、对客户端访问授权，上网进行认证。（它可以记录你的访问信息和访问记录，从某个角度说GFW也可以说是一个代理，不过他的代理是只能代理部分网站，不是所有的都能去访问。他通过IP黑名单或者DNS污染禁止你去访问一些网站）。</p>
+<p>一般网络根据协议去代理，比如说socke代理，http代理，htts代理，vpn代理等。</p>
+<h4 id="反向代理"><a href="#反向代理" class="headerlink" title="反向代理"></a>反向代理</h4><p>反向代理（Reverse Proxy）实际运行方式是指以代理服务器来接受internet上的连接请求，然后将请求转发给内部网络上的服务器（一般也要和DNS服务器配合），并将从服务器上得到的结果返回给internet上请求连接的客户端，此时代理服务器对外就表现为一个服务器。一般反向代理需要配置的是服务端（所以一般程序员使用的比较多）</p>
+<p><img src="/img/proxy/proxy-02.png" alt=""></p>
+<p>举个栗子：</p>
+<p>在拨打10086客服电话，可能一个地区的10086客服有几个或者几十个，你永远都不需要关心在电话那头的是哪一个，叫什么，男的，还是女的，漂亮的还是帅气的，你都不关心，你关心的是你的问题能不能得到专业的解答，你只需要拨通了10086的总机号码，电话那头总会有人会回答你，只是有时慢有时快而已。那么这里的10086总机号码就是我们说的反向代理。客户不知道真正提供服务人的是谁。</p>
+<p>优点：</p>
+<p>1、保证内网的安全，可以使用反向代理提供WAF功能，阻止web攻击，如Dos，DDos。大型网站，通常将反向代理作为公网访问地址，Web服务器是内网。（WAF（<strong>Web Application Firewall</strong>）网站应用级入侵防御系统。Web应用防火墙是通过执行一系列针对HTTP/HTTPS的安全策略来专门为Web应用提供保护的一款产品。）</p>
+<p>2、负载均衡，通过反向代理服务器来优化网站的负载。若服务器簇中有负荷较高者，反向代理通过URL重写，根据连线请求从负荷较低者获取与所需相同的资源或备援。</p>
+<p>3、对一些内容进行压缩，以节约带宽或为网络带宽不佳的网络提供服务；还可以缓存静态内容，当静态内容发生变化时，通过内部通知机制通知反向代理服务器缓存失效，需重新加载。（也就是所谓的CDN （<strong>Content Delivery Network</strong> ）内容分发网络）</p>
+<p>4、提供HTTP访问认证。统一提供加密和SSL加速（如SSL终端代理）。</p>
+<p>一般反向代理都是通过服务器去分发请求，这种服务器有Nginx、Tengine、HAProxy、Apache HTTP Server。</p>
+<h4 id="正向代理与反向代理的区别"><a href="#正向代理与反向代理的区别" class="headerlink" title="正向代理与反向代理的区别"></a>正向代理与反向代理的区别</h4><p>正向代理中，proxy和client同属一个LAN，对server透明；</p>
+<p>反向代理中，proxy和server同属一个LAN，对client透明。</p>
+<p>实际上proxy在两种代理中做的事都是代为收发请求和响应，不过从结构上来看正好左右互换了下，所以把后出现的那种代理方式叫成了反向代理。</p>
+<p><img src="/img/proxy/proxy-03.jpg" alt=""></p>
+<h4 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h4><p>正向代理通过代理服务器隐藏客户端，反向代理是通过代理服务器隐藏服务端。</p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;h4 id=&quot;什么是代理，网络代理，代理服务器&quot;&gt;&lt;a href=&quot;#什么是代理，网络代理，代理服务器&quot; class=&quot;headerlink&quot; title=&quot;什么是代理，网络代理，代理服务器&quot;&gt;&lt;/a&gt;什么是代理，网络代理，代理服务器&lt;/h4&gt;&lt;p&gt;代理（proxy）很容易理解
+    
+    </summary>
+    
+      <category term="网络" scheme="http://yoursite.com/categories/%E7%BD%91%E7%BB%9C/"/>
+    
+    
+      <category term="网络" scheme="http://yoursite.com/tags/%E7%BD%91%E7%BB%9C/"/>
+    
+  </entry>
   
   <entry>
     <title>浅谈Java垃圾回收与JVM</title>
@@ -1237,9 +1286,9 @@
       <category term="java" scheme="http://yoursite.com/categories/java/"/>
     
     
-      <category term="编程" scheme="http://yoursite.com/tags/%E7%BC%96%E7%A8%8B/"/>
-    
       <category term="java" scheme="http://yoursite.com/tags/java/"/>
+    
+      <category term="编程" scheme="http://yoursite.com/tags/%E7%BC%96%E7%A8%8B/"/>
     
       <category term="源代码" scheme="http://yoursite.com/tags/%E6%BA%90%E4%BB%A3%E7%A0%81/"/>
     
@@ -1281,9 +1330,9 @@
       <category term="java" scheme="http://yoursite.com/categories/java/"/>
     
     
-      <category term="编程" scheme="http://yoursite.com/tags/%E7%BC%96%E7%A8%8B/"/>
-    
       <category term="java" scheme="http://yoursite.com/tags/java/"/>
+    
+      <category term="编程" scheme="http://yoursite.com/tags/%E7%BC%96%E7%A8%8B/"/>
     
       <category term="源代码" scheme="http://yoursite.com/tags/%E6%BA%90%E4%BB%A3%E7%A0%81/"/>
     
@@ -1462,9 +1511,9 @@
       <category term="java" scheme="http://yoursite.com/categories/java/"/>
     
     
-      <category term="编程" scheme="http://yoursite.com/tags/%E7%BC%96%E7%A8%8B/"/>
-    
       <category term="java" scheme="http://yoursite.com/tags/java/"/>
+    
+      <category term="编程" scheme="http://yoursite.com/tags/%E7%BC%96%E7%A8%8B/"/>
     
   </entry>
   
@@ -1558,46 +1607,6 @@
   </entry>
   
   <entry>
-    <title>Java语法糖</title>
-    <link href="http://yoursite.com/2017/05/14/Java%E8%AF%AD%E6%B3%95%E7%B3%96/"/>
-    <id>http://yoursite.com/2017/05/14/Java语法糖/</id>
-    <published>2017-05-14T03:26:05.000Z</published>
-    <updated>2017-11-25T02:37:08.571Z</updated>
-    
-    <content type="html"><![CDATA[<ul>
-<li>Java语法糖（syntactic sugar），也称为糖衣语法，是由英国计算机科学家Peter.j.Landin发明的术语，指计算机语言中添加某种语法。（说白了就是对现有语法的封装）这种语法对语言是我功能并没有影响，但是方便程序员使用。Java中最常用的语法糖泛型，变长参数，条件编译，自动拆装箱，内部类，枚举类等。虚拟机其实并不支持这些语法，他们都是在编译期被还原成简单基础的语法结构。这个过程为语法糖。</li>
-<li><p>泛型的实现</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line"><span class="comment">/**</span></div><div class="line">* 在源代码中存在泛型</div><div class="line">*/</div><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</div><div class="line">    Map&lt;String,String&gt; map = <span class="keyword">new</span> HashMap&lt;String,String&gt;();</div><div class="line">    map.put(<span class="string">"hello"</span>,<span class="string">"你好"</span>);</div><div class="line">    String hello = map.get(<span class="string">"hello"</span>);</div><div class="line">    System.out.println(hello);</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="comment">//当上述源代码被编译为class文件后，泛型被擦除且引入强制类型转换</span></div><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</div><div class="line">    HashMap map = <span class="keyword">new</span> HashMap(); <span class="comment">//类型擦除</span></div><div class="line">    map.put(<span class="string">"hello"</span>, <span class="string">"你好"</span>);</div><div class="line">    String hello = (String)map.get(<span class="string">"hello"</span>);<span class="comment">//强制转换</span></div><div class="line">    System.out.println(hello);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-</li>
-<li><p>自动拆装箱的实现</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line">//源码中的泛型</div><div class="line">public static void main(String[] args) &#123;</div><div class="line">    Integer a = 1;</div><div class="line">    int b = 2;</div><div class="line">    int c = a + b;</div><div class="line">    System.out.println(c);</div><div class="line">&#125;</div><div class="line"></div><div class="line">//编译为class文件</div><div class="line"></div><div class="line">public static void main(String[] args) &#123;</div><div class="line">    Integer a = Integer.valueOf(1); // 自动装箱</div><div class="line">    byte b = 2;</div><div class="line">    int c = a.intValue() + b;//自动拆箱</div><div class="line">    System.out.println(c);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-</li>
-<li><p>变长参数</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div></pre></td><td class="code"><pre><div class="line">//源码中的变长参数</div><div class="line">public class Varargs &#123;</div><div class="line">    public static void print(String... args) &#123;</div><div class="line">        for(String str : args)&#123;</div><div class="line">            System.out.println(str);</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    public static void main(String[] args) &#123;</div><div class="line">        print(&quot;hello&quot;, &quot;world&quot;);</div><div class="line">    &#125;</div><div class="line">&#125;</div><div class="line">//编译后的变长参数，而且能看出来变长参数是通过数组实现的</div><div class="line">public class Varargs &#123;</div><div class="line">    public Varargs() &#123;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    public static void print(String... args) &#123;</div><div class="line">        String[] var1 = args;</div><div class="line">        int var2 = args.length;</div><div class="line">        //增强for循环的数组实现方式</div><div class="line">        for(int var3 = 0; var3 &lt; var2; ++var3) &#123;</div><div class="line">            String str = var1[var3];</div><div class="line">            System.out.println(str);</div><div class="line">        &#125;</div><div class="line"></div><div class="line">    &#125;</div><div class="line"></div><div class="line">    public static void main(String[] args) &#123;</div><div class="line">        //变长参数转换为数组</div><div class="line">        print(new String[]&#123;&quot;hello&quot;, &quot;world&quot;&#125;);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-</li>
-<li><p>内部类</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">//在源码中的内部类</div><div class="line">public class Outer &#123;</div><div class="line">    class Inner&#123;</div><div class="line">    &#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line">//在编译后的内部类</div><div class="line"></div><div class="line">class Outer$Inner &#123;</div><div class="line">    Outer$Inner(Outer var1) &#123;</div><div class="line">        this.this$0 = var1;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-</li>
-<li><p>枚举类型</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div></pre></td><td class="code"><pre><div class="line">//在源码中的枚举实现</div><div class="line"></div><div class="line">public enum Fruit &#123;</div><div class="line">    APPLE,ORINGE</div><div class="line">&#125;</div><div class="line"></div><div class="line">//编译后的枚举</div><div class="line"></div><div class="line">//继承java.lang.Enum并声明为final</div><div class="line">public final class Fruit extends Enum</div><div class="line">&#123;</div><div class="line"></div><div class="line">    public static Fruit[] values()</div><div class="line">    &#123;</div><div class="line">        return (Fruit[])$VALUES.clone();</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    public static Fruit valueOf(String s)</div><div class="line">    &#123;</div><div class="line">        return (Fruit)Enum.valueOf(Fruit, s);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    private Fruit(String s, int i)</div><div class="line">    &#123;</div><div class="line">        super(s, i);</div><div class="line">    &#125;</div><div class="line">    //枚举类型常量</div><div class="line">    public static final Fruit APPLE;</div><div class="line">    public static final Fruit ORANGE;</div><div class="line">    private static final Fruit $VALUES[];//使用数组进行维护</div><div class="line"></div><div class="line">    static</div><div class="line">    &#123;   </div><div class="line">        //protected Enum(String name, int ordinal),这个构造函数是Enum自带的，ordinal是用来排序的</div><div class="line">        APPLE = new Fruit(&quot;APPLE&quot;, 0);</div><div class="line">        ORANGE = new Fruit(&quot;ORANGE&quot;, 1);</div><div class="line">        $VALUES = (new Fruit[] &#123;</div><div class="line">            APPLE, ORANGE</div><div class="line">        &#125;);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></li>
-</ul>
-]]></content>
-    
-    <summary type="html">
-    
-      &lt;ul&gt;
-&lt;li&gt;Java语法糖（syntactic sugar），也称为糖衣语法，是由英国计算机科学家Peter.j.Landin发明的术语，指计算机语言中添加某种语法。（说白了就是对现有语法的封装）这种语法对语言是我功能并没有影响，但是方便程序员使用。Java中最常用的语法糖
-    
-    </summary>
-    
-      <category term="java" scheme="http://yoursite.com/categories/java/"/>
-    
-    
-      <category term="编程" scheme="http://yoursite.com/tags/%E7%BC%96%E7%A8%8B/"/>
-    
-  </entry>
-  
-  <entry>
     <title>HashMap</title>
     <link href="http://yoursite.com/2017/05/14/HashMap/"/>
     <id>http://yoursite.com/2017/05/14/HashMap/</id>
@@ -1634,6 +1643,46 @@
       &lt;ul&gt;
 &lt;li&gt;&lt;p&gt;什么是hash    &lt;/p&gt;
 &lt;p&gt;散列法（Hashing）或哈希法是一种将字符组成的字符串转换为固定长度（一般是更短长度）的数值或索引值的方法，称为散列法，也叫哈希法。==简单来讲就是将任意长度的二进制映射到固定长度的较小的二进制，而这个较小的二进制是
+    
+    </summary>
+    
+      <category term="java" scheme="http://yoursite.com/categories/java/"/>
+    
+    
+      <category term="编程" scheme="http://yoursite.com/tags/%E7%BC%96%E7%A8%8B/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Java语法糖</title>
+    <link href="http://yoursite.com/2017/05/14/Java%E8%AF%AD%E6%B3%95%E7%B3%96/"/>
+    <id>http://yoursite.com/2017/05/14/Java语法糖/</id>
+    <published>2017-05-14T03:26:05.000Z</published>
+    <updated>2017-11-25T02:37:08.571Z</updated>
+    
+    <content type="html"><![CDATA[<ul>
+<li>Java语法糖（syntactic sugar），也称为糖衣语法，是由英国计算机科学家Peter.j.Landin发明的术语，指计算机语言中添加某种语法。（说白了就是对现有语法的封装）这种语法对语言是我功能并没有影响，但是方便程序员使用。Java中最常用的语法糖泛型，变长参数，条件编译，自动拆装箱，内部类，枚举类等。虚拟机其实并不支持这些语法，他们都是在编译期被还原成简单基础的语法结构。这个过程为语法糖。</li>
+<li><p>泛型的实现</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line"><span class="comment">/**</span></div><div class="line">* 在源代码中存在泛型</div><div class="line">*/</div><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</div><div class="line">    Map&lt;String,String&gt; map = <span class="keyword">new</span> HashMap&lt;String,String&gt;();</div><div class="line">    map.put(<span class="string">"hello"</span>,<span class="string">"你好"</span>);</div><div class="line">    String hello = map.get(<span class="string">"hello"</span>);</div><div class="line">    System.out.println(hello);</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="comment">//当上述源代码被编译为class文件后，泛型被擦除且引入强制类型转换</span></div><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</div><div class="line">    HashMap map = <span class="keyword">new</span> HashMap(); <span class="comment">//类型擦除</span></div><div class="line">    map.put(<span class="string">"hello"</span>, <span class="string">"你好"</span>);</div><div class="line">    String hello = (String)map.get(<span class="string">"hello"</span>);<span class="comment">//强制转换</span></div><div class="line">    System.out.println(hello);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</li>
+<li><p>自动拆装箱的实现</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line">//源码中的泛型</div><div class="line">public static void main(String[] args) &#123;</div><div class="line">    Integer a = 1;</div><div class="line">    int b = 2;</div><div class="line">    int c = a + b;</div><div class="line">    System.out.println(c);</div><div class="line">&#125;</div><div class="line"></div><div class="line">//编译为class文件</div><div class="line"></div><div class="line">public static void main(String[] args) &#123;</div><div class="line">    Integer a = Integer.valueOf(1); // 自动装箱</div><div class="line">    byte b = 2;</div><div class="line">    int c = a.intValue() + b;//自动拆箱</div><div class="line">    System.out.println(c);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</li>
+<li><p>变长参数</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div></pre></td><td class="code"><pre><div class="line">//源码中的变长参数</div><div class="line">public class Varargs &#123;</div><div class="line">    public static void print(String... args) &#123;</div><div class="line">        for(String str : args)&#123;</div><div class="line">            System.out.println(str);</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    public static void main(String[] args) &#123;</div><div class="line">        print(&quot;hello&quot;, &quot;world&quot;);</div><div class="line">    &#125;</div><div class="line">&#125;</div><div class="line">//编译后的变长参数，而且能看出来变长参数是通过数组实现的</div><div class="line">public class Varargs &#123;</div><div class="line">    public Varargs() &#123;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    public static void print(String... args) &#123;</div><div class="line">        String[] var1 = args;</div><div class="line">        int var2 = args.length;</div><div class="line">        //增强for循环的数组实现方式</div><div class="line">        for(int var3 = 0; var3 &lt; var2; ++var3) &#123;</div><div class="line">            String str = var1[var3];</div><div class="line">            System.out.println(str);</div><div class="line">        &#125;</div><div class="line"></div><div class="line">    &#125;</div><div class="line"></div><div class="line">    public static void main(String[] args) &#123;</div><div class="line">        //变长参数转换为数组</div><div class="line">        print(new String[]&#123;&quot;hello&quot;, &quot;world&quot;&#125;);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</li>
+<li><p>内部类</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">//在源码中的内部类</div><div class="line">public class Outer &#123;</div><div class="line">    class Inner&#123;</div><div class="line">    &#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line">//在编译后的内部类</div><div class="line"></div><div class="line">class Outer$Inner &#123;</div><div class="line">    Outer$Inner(Outer var1) &#123;</div><div class="line">        this.this$0 = var1;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</li>
+<li><p>枚举类型</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div></pre></td><td class="code"><pre><div class="line">//在源码中的枚举实现</div><div class="line"></div><div class="line">public enum Fruit &#123;</div><div class="line">    APPLE,ORINGE</div><div class="line">&#125;</div><div class="line"></div><div class="line">//编译后的枚举</div><div class="line"></div><div class="line">//继承java.lang.Enum并声明为final</div><div class="line">public final class Fruit extends Enum</div><div class="line">&#123;</div><div class="line"></div><div class="line">    public static Fruit[] values()</div><div class="line">    &#123;</div><div class="line">        return (Fruit[])$VALUES.clone();</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    public static Fruit valueOf(String s)</div><div class="line">    &#123;</div><div class="line">        return (Fruit)Enum.valueOf(Fruit, s);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    private Fruit(String s, int i)</div><div class="line">    &#123;</div><div class="line">        super(s, i);</div><div class="line">    &#125;</div><div class="line">    //枚举类型常量</div><div class="line">    public static final Fruit APPLE;</div><div class="line">    public static final Fruit ORANGE;</div><div class="line">    private static final Fruit $VALUES[];//使用数组进行维护</div><div class="line"></div><div class="line">    static</div><div class="line">    &#123;   </div><div class="line">        //protected Enum(String name, int ordinal),这个构造函数是Enum自带的，ordinal是用来排序的</div><div class="line">        APPLE = new Fruit(&quot;APPLE&quot;, 0);</div><div class="line">        ORANGE = new Fruit(&quot;ORANGE&quot;, 1);</div><div class="line">        $VALUES = (new Fruit[] &#123;</div><div class="line">            APPLE, ORANGE</div><div class="line">        &#125;);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></li>
+</ul>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;ul&gt;
+&lt;li&gt;Java语法糖（syntactic sugar），也称为糖衣语法，是由英国计算机科学家Peter.j.Landin发明的术语，指计算机语言中添加某种语法。（说白了就是对现有语法的封装）这种语法对语言是我功能并没有影响，但是方便程序员使用。Java中最常用的语法糖
     
     </summary>
     
