@@ -394,7 +394,8 @@
       
         
           
-          UnSafe类 UnSafe是一个类，它存放于package sun.misc;是Java的一个基本类。看这个包名应该是属于BootStrap加载器加载的类。其次他是一个public final class Unsafe {}Final和不公开的类，他不能被直接的new 出来而是通过反射的方式获取到（后面会有代码做演示）。同样它也不能被继承，所以一般情况下我们在做应用开发的时候很少会使用到这类，但是这个类却在很多框架和并发包中大量的使用，所以想深入的了解Java还是要知道一些关于UnSafe类的
+          UnSafe类 UnSafe是一个类，它存放于package sun.misc;是Java的一个基本类。看这个包名应该是属于BootStrap加载器加载的类。其次他是一个public final class Unsafe {}Final的类，他不能被直接的new 出来而是通过反射的方式获取到（后面会有代码做演示）。同样它也不能被继承，所以一般情况下我们在做应用开发的时候很少会使用到这类，但是这个类却在很多框架和并发包中大量的使用，所以想深入的了解Java还是要知道一些关于UnSafe类的知识。
+
           ...
           <!--noindex-->
           <div class="post-button text-center">
