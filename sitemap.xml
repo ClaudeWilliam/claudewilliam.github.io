@@ -2,6 +2,20 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>http://yoursite.com/2018/10/05/Hash%E4%B8%80%E8%87%B4%E6%80%A7%E7%AE%97%E6%B3%95%E4%B8%8EJava%E7%9A%84%E7%AE%80%E5%8D%95%E5%AE%9E%E7%8E%B0/</loc>
+    
+    <lastmod>2018-10-22T16:04:42.161Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://yoursite.com/2017/12/16/%E6%A0%91%E4%B8%8E%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/</loc>
+    
+    <lastmod>2018-10-08T16:39:46.834Z</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>http://yoursite.com/2018/08/25/%E6%B5%85%E6%9E%90UnSafe%E7%B1%BB/</loc>
     
     <lastmod>2018-09-12T12:51:22.269Z</lastmod>
@@ -33,13 +47,6 @@
     <loc>http://yoursite.com/2018/03/20/%E6%B5%85%E6%9E%90Java%20ArrayList%E6%BA%90%E7%A0%81/</loc>
     
     <lastmod>2018-03-23T11:43:23.061Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>http://yoursite.com/2017/12/16/%E6%A0%91%E4%B8%8E%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/</loc>
-    
-    <lastmod>2018-03-23T11:18:17.905Z</lastmod>
     
   </url>
   

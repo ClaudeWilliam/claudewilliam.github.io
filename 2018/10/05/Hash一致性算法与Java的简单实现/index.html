@@ -1,0 +1,1379 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/img/flag.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/img/flag.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/img/flag.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/img/flag.png?v=5.1.3" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="java,算法," />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="Hill's Notes" type="application/atom+xml" />
+
+
+
+
+
+
+<meta name="description" content="重提Hash你会发现，在编程的这个领域里面Hash是经常被提及的一个词，我们经常使用比如HashMap，HashSet等等都是与Hash有关，之前我也写过一篇关于HashMap的简介，就是简单的介绍一下Hash，那么我们现在又开始聊Hash一致性算法。这个也是和Hash有关。 之前我们提及Hash其实就是做一个映射，把一个比较大的集合，或者一个比较复杂的集合，映射到一个比较简单的集合。这个过程叫H">
+<meta name="keywords" content="java,算法">
+<meta property="og:type" content="article">
+<meta property="og:title" content="一致性Hash算法与Java的简单实现">
+<meta property="og:url" content="http://yoursite.com/2018/10/05/Hash一致性算法与Java的简单实现/index.html">
+<meta property="og:site_name" content="Hill&#39;s Notes">
+<meta property="og:description" content="重提Hash你会发现，在编程的这个领域里面Hash是经常被提及的一个词，我们经常使用比如HashMap，HashSet等等都是与Hash有关，之前我也写过一篇关于HashMap的简介，就是简单的介绍一下Hash，那么我们现在又开始聊Hash一致性算法。这个也是和Hash有关。 之前我们提及Hash其实就是做一个映射，把一个比较大的集合，或者一个比较复杂的集合，映射到一个比较简单的集合。这个过程叫H">
+<meta property="og:image" content="http://yoursite.com/img/hash/hash-01.png">
+<meta property="og:image" content="http://yoursite.com/img/hash/hash-02.jpg">
+<meta property="og:image" content="http://yoursite.com/img/hash/hash-03.png">
+<meta property="og:image" content="http://yoursite.com/img/hash/hash-05.png">
+<meta property="og:updated_time" content="2018-10-22T16:04:42.161Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="一致性Hash算法与Java的简单实现">
+<meta name="twitter:description" content="重提Hash你会发现，在编程的这个领域里面Hash是经常被提及的一个词，我们经常使用比如HashMap，HashSet等等都是与Hash有关，之前我也写过一篇关于HashMap的简介，就是简单的介绍一下Hash，那么我们现在又开始聊Hash一致性算法。这个也是和Hash有关。 之前我们提及Hash其实就是做一个映射，把一个比较大的集合，或者一个比较复杂的集合，映射到一个比较简单的集合。这个过程叫H">
+<meta name="twitter:image" content="http://yoursite.com/img/hash/hash-01.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"hide","offset":8,"b2t":true,"scrollpercent":true,"onmobile":true},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2018/10/05/Hash一致性算法与Java的简单实现/"/>
+
+
+
+
+
+  <title>一致性Hash算法与Java的简单实现 | Hill's Notes</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+  
+		<script type="text/javascript"  color="0,0,255" opacity='0.7' zIndex="0" count="99" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta custom-logo">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Hill's Notes</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">notes and blog</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/10/05/Hash一致性算法与Java的简单实现/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Hill">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/img/cluade.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hill's Notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">一致性Hash算法与Java的简单实现</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-10-05T09:21:08+08:00">
+                2018-10-05
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/编程/" itemprop="url" rel="index">
+                    <span itemprop="name">编程</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+             <span id="/2018/10/05/Hash一致性算法与Java的简单实现/" class="leancloud_visitors" data-flag-title="一致性Hash算法与Java的简单实现">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h4 id="重提Hash"><a href="#重提Hash" class="headerlink" title="重提Hash"></a>重提Hash</h4><p>你会发现，在编程的这个领域里面Hash是经常被提及的一个词，我们经常使用比如HashMap，HashSet等等都是与Hash有关，之前我也写过一篇关于HashMap的简介，就是简单的介绍一下Hash，那么我们现在又开始聊Hash一致性算法。这个也是和Hash有关。</p>
+<p>之前我们提及Hash其实就是做一个映射，把一个比较大的集合，或者一个比较复杂的集合，映射到一个比较简单的集合。这个过程叫Hash，这样我们在这个简单的集合实现一些运算比较容易。这是一种比较简单的说法，但是实际上真正的Hash要比这个复杂，Hash算法叫散列值算法。</p>
+<p>散列函数是任何函数可被用于映射数据任意大小的为固定大小的数据。散列函数返回的值称为散列值，散列码，摘要或简单的散列。在HashMap中一般这个散列码就是数组中数组下标。但是这个散列码也就是我们经常说的HashCode。估计这个时候有人会问hashCode一直的两个对象相等吗。一般来讲HashCode相等的两个对象一般不等，而相等的两个对象HashCode一定相等。毕竟Hash算法一般是有冲突的，所以HashMap中是使用数组+链表(拉链)的形式来解决冲突，具体在这里不介绍了。</p>
+<p>一般我们都使用的是什么Hash算法，一般使用都是取模的方实现Hash映射，这种方式一般容易理解，而且简单暴力。而且好多数据结构也都这样的实现，比如HashMap。</p>
+<p>简单hash算法在实现上为：目标 target = hash（key）/ mod（质数）。key就是一个关键字的Code，target就是下标位置。质数一般就是数组的大小。（这个时候有人肯定会问不是质数好不好，这里我们先留意疑问，我们在下面去解释这个为什么是质数，而且这个也要涉及一些枯燥的概念）</p>
+<h4 id="如何判断一个Hash算法好坏（在分布式环境下）"><a href="#如何判断一个Hash算法好坏（在分布式环境下）" class="headerlink" title="如何判断一个Hash算法好坏（在分布式环境下）"></a>如何判断一个Hash算法好坏（在分布式环境下）</h4><h5 id="平衡性-Balance"><a href="#平衡性-Balance" class="headerlink" title="平衡性(Balance)"></a>平衡性(Balance)</h5><p>平衡性是指哈希的结果能够尽可能分布到所有的缓冲中去，这样可以使得所有的缓冲空间都得到利用。很多哈希算法都能够满足这一条件。</p>
+<h5 id="单调性-Monotonicity"><a href="#单调性-Monotonicity" class="headerlink" title="单调性(Monotonicity)"></a>单调性(Monotonicity)</h5><p>单调性是指如果已经有一些内容通过哈希分派到了相应的缓冲中，又有新的缓冲加入到系统中。哈希的结果应能够保证原有已分配的内容可以被映射到原有的或者新的缓冲中去，而不会被映射到旧的缓冲集合中的其他缓冲区。</p>
+<h5 id="分散性-Spread"><a href="#分散性-Spread" class="headerlink" title="分散性(Spread)"></a>分散性(Spread)</h5><p>在分布式环境中，终端有可能看不到所有的缓冲，而是只能看到其中的一部分。当终端希望通过哈希过程将内容映射到缓冲上时，由于不同终端所见的缓冲范围有可能不同，从而导致哈希的结果不一致，最终的结果是<strong>相同的内容被不同的终端映射到不同的缓冲区</strong>中。这种情况显然是应该避免的，因为它导致相同内容被存储到不同缓冲中去，降低了<strong>系统存储的效率</strong>。分散性的定义就是上述情况发生的严重程度。好的哈希算法应能够尽量避免不一致的情况发生，也就是尽量降低分散性。（举个极端例子，如果你存100个对象的List，那么100个对象分部100台机器上，要对100台机器操作1次。这样效率极低，同时100台机器网络也会出现问题，但是如果50存放到A，50存放到B就会好很多，你就可以操作2台机器查找100条数据。其实就是和数组和链表差不多，在查找过程中由于数组是连续的内存随意可以快速的查找100个，而链表是100个分散的地址，只有找到当前，才能找到下一个。对于查找来说还是数组快一点也就是，相同（相关联）的数据都在一台机器上）</p>
+<h5 id="负载-Load"><a href="#负载-Load" class="headerlink" title="负载(Load)"></a>负载(Load)</h5><p>负载问题实际上是从另一个角度看待分散性问题。既然<strong>不同的终端可能将相同的内容映射到不同的缓冲区</strong>中，那么对于一个特定的缓冲区而言，也可能被不同的用户映射为不同的内容（导致一个节点对于多个终端访问，导致负载过高）。与分散性一样，这种情况也是应当避免的，因此好的哈希算法应能够尽量降低缓冲的负荷。（举一个极端的例子，就是一共有200个终端，存放200个数据，这个200数据中的部分数据都有存放到A机器上，那么A机器就相当有200负载，如果这有100个数据全部都存在B机器上，那么A，B的负载都是100，不是A是200，B也是200）</p>
+<p>所以一个好的hash算法要有，高平衡（比较分散，不是集中），单调性（保证当有新的缓存加入时候不会大量失效，之前的数据），低分散（相同的数据尽量都在一起，提高系统存储效率），低负载（）</p>
+<p>一般在分布式（缓存）系统中，通过这种方式来实现负载均衡（也就是集群中请求的分配）。一般这个mod就是机器的个数。这样可以快速的实现负载均衡的办法。但是这样有一个问题，就是分布式系统中有一台机器挂掉了，或者出现错误，或者说我临时增加或减少机器，那么这中间就会有大量的（缓存）数据失效，不得不重新的写入数据。（<strong>简单Hash算法计算的值会依赖于mod。如果再加入一个分区则之前的hash映射都会失效，无法动态调整，严重违反单调性 </strong>）因为你的mod变了，你求出来的余数也就会有很大的变化。为了解决这个问题，就出现了一致性Hash算法。它可以在最小程度上减小（缓存）数据的失效问题。同时通过虚拟节点的使用提高了平衡性，降低了分散性和负载。对于Hash算法来说</p>
+<h4 id="什么是一致性Hash算法（Consistent-hashing）"><a href="#什么是一致性Hash算法（Consistent-hashing）" class="headerlink" title="什么是一致性Hash算法（Consistent hashing）"></a>什么是一致性Hash算法（Consistent hashing）</h4><p>一致性哈希算法在1997年由麻省理工学院的Karger等人在解决分布式Cache中提出的，设计目标是为了解决因特网中的热点(Hot spot)问题，初衷和CARP（Common Access Redundancy Protocol 共用地址冗余协议）十分类似。一致性哈希修正了CARP使用的简单哈希算法带来的问题，使得DHT（分布式哈希）可以在P2P环境中真正得到应用。</p>
+<p>一致哈希 是一种特殊的哈希算法。在使用一致哈希算法后，哈希表槽位数（大小）的改变平均只需要对  K/n 个关键字重新映射，其中 K是关键字的数量， n是槽位数量。然而在传统的哈希表中，添加或删除一个槽位的几乎需要对所有关键字进行重新映射。</p>
+<p>一致哈希 是一种特殊的哈希算法。在使用一致哈希算法后，哈希表槽位数（大小）的改变平均只需要对  <strong>K/n</strong> 个关键字重新映射，其中 <strong>K</strong>是关键字的数量， <strong>n</strong>是槽位数量。然而在传统的哈希表中，添加或删除一个槽位的几乎需要对所有关键字进行重新映射。</p>
+<p>一致哈希由MIT的Karger及其合作者提出，现在这一思想已经扩展到其它领域。在这篇1997年发表的学术论文中介绍了“一致哈希”如何应用于用户易变的分布式Web服务中。哈希表中的每一个代表分布式系统中一个节点，在系统添加或删除节点只需要移动 <strong>K/n</strong>项。</p>
+<p>这是wiki上给的，我们看的比较懵逼，如果用图片在结合一个例子就很好的解释这个一致性Hash算法。</p>
+<h4 id="一致性Hash算法，解决了什么问题"><a href="#一致性Hash算法，解决了什么问题" class="headerlink" title="一致性Hash算法，解决了什么问题"></a>一致性Hash算法，解决了什么问题</h4><p>一致性哈希算法的基本原理，把数据通过hash函数映射到一个很大的环形空间里，Hash环上有0~2$^{32}$-1个槽（slot）。也就是一个圆，上面有2$^{32}$个点，这些点首尾相连，我们的所有的key就只能在这个圆上面映射。（一般来说这个数量也够了）</p>
+<p><img src="/img/hash/hash-01.png" alt=""></p>
+<p>我们通过取余的计算方法，计算出key的位置，但是我们不把数据放在位置上，而是把数据存放到，最近的存储节点（也就是缓存服务器上）。也就是说你存放的数据的服务器也被映射到这个Hash环，上，然后计算你与存储节点的位置来定位你存储的位置。</p>
+<p>A、B、C、D 4台缓存服务器通过hash函数映射环形空间上，数据的存储时，先得到一个hash值，对应到这个环中的每个位置，如缓存数据:K1对应到了图中所示的位置，然后沿顺时针找到一个机器节点A，将K1存储到A节点上，K2存储到A节点上，K3、K4存储到B节点上。</p>
+<p><img src="/img/hash/hash-02.jpg" alt=""></p>
+<p>我们从图中可以看到，ABCD四个存储节点也映射到Hash环上了。然后他们每个人节点都可以控制自己的一块区域，这样可以实现负载均衡，假设这些点都均匀分布的话，相当这些槽就把数据给平分了。就只变动<strong>1/n</strong>的总数据，如果总数据是K个的话，当一个节点增加或者减少的时候会有也就是上面的<strong>K/n</strong>变动。</p>
+<p><img src="/img/hash/hash-03.png" alt=""></p>
+<p>如果B节点挂机了，那么B节点的数据就会集中到C节点中。只会影响C节点，对其他的节点A，D的数据不会造成影响。这样是不是就可以了能，很明显这中间还是有很多问题。</p>
+<p>首先就是数据是不是均匀，是不是数据都是均匀分在这个Hash环上，如果分布不均匀导致有的机器过载，但是有个机器却没有负载。在一点就是上面B节点宕机后，所有的数据都集中到B上会导致B集中了大量的集中数据。可能会导致“雪崩效应”</p>
+<p>（B节点崩溃后，所有数据集中到A点，然后A点过载后也会崩掉。也就是由一个点的宕机导致整个集群垮掉的事情）。所以如何解决上面这两个问题。</p>
+<p>答案就是增加节点个数，保证前面的数据均匀，但是一个节点可能挂掉也会导致雪崩效应，同时节点个数很多也是要钱的，所以我们就把这些节点变成虚拟节点。这些虚拟节点不存储数据，他会把数据给后面的真实节点。而且这些虚拟节点也可以与真实节点中间实现一个均匀（变动）的映射，不会使某个节点过载问题。</p>
+<p><img src="/img/hash/hash-05.png" alt=""></p>
+<p>引入“虚拟节点”后，映射关系就从 {对象 -&gt;节点 }转换到了 {对象 -&gt;虚拟节点 }。图中的A1、A2、B1、B2、C1、C2、D1、D2都是虚拟节点，机器A负载存储A1、A2的数据，机器B负载存储B1、B2的数据，机器C负载存储C1、C2的数据。由于这些虚拟节点数量很多，均匀分布，提高了平衡性，因此不会造成“雪崩”现象。</p>
+<p>所以一致性Hash算法提高了分布式系统的<strong>性能</strong>（减少缓存重新映射）和<strong>健壮性</strong>（不会导致雪崩效应）。</p>
+<h4 id="一致性Hash算法的应用"><a href="#一致性Hash算法的应用" class="headerlink" title="一致性Hash算法的应用"></a>一致性Hash算法的应用</h4><p>在Memcached、Key-Value Store、Bittorrent DHT、LVS中都采用了Consistent Hashing算法，可以说Consistent Hashing 是分布式系统负载均衡的首选算法。</p>
+<p>一致性hash算法是分布式中一个常用且好用的分片算法、主要使用于分布式缓存系统，或者数据库分库分表算法。在guava 和java的API中都有一致性hash的工具类，我们可以直接的使用。现在的互联网服务架构中，为避免单点故障、提升处理效率、横向扩展等原因，分布式系统已经成为了居家旅行必备的部署模式。</p>
+<h4 id="JAVA的简单实现一致性Hash算法"><a href="#JAVA的简单实现一致性Hash算法" class="headerlink" title="JAVA的简单实现一致性Hash算法"></a>JAVA的简单实现一致性Hash算法</h4><p>带有虚拟节点的代码</p>
+<p>用于计算和建立虚拟节点关系类</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ConsistentHash</span> </span>&#123;</div><div class="line"></div><div class="line">    <span class="comment">//虚拟节点</span></div><div class="line">    <span class="keyword">private</span> SortedMap&lt;Integer, Node&gt; virNode;</div><div class="line"></div><div class="line">    <span class="comment">//真实的节点,这里使用LinkedList更好</span></div><div class="line">    <span class="keyword">private</span> List&lt;Node&gt; realNode;</div><div class="line"></div><div class="line">    <span class="keyword">private</span> <span class="keyword">int</span> nodeNum ;</div><div class="line"></div><div class="line">    <span class="keyword">private</span> <span class="keyword">final</span> <span class="keyword">int</span> DEFAULT_NODE_NUM = <span class="number">10</span>; <span class="comment">// 每个机器节点关联的虚拟节点个数</span></div><div class="line"></div><div class="line">    <span class="comment">//初始化一直性Hash对象，向里面添加真实的节点</span></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="title">ConsistentHash</span><span class="params">(List&lt;Node&gt; realNode)</span> </span>&#123;</div><div class="line">        <span class="keyword">this</span>.realNode = realNode;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="title">ConsistentHash</span><span class="params">(List&lt;Node&gt; realNode,<span class="keyword">int</span> nodeNum)</span> </span>&#123;</div><div class="line">        <span class="keyword">this</span>.realNode = realNode;</div><div class="line">        <span class="keyword">this</span>.nodeNum=nodeNum;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="comment">//初始化一致性Hash对象</span></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">init</span><span class="params">()</span> </span>&#123;</div><div class="line">        virNode = <span class="keyword">new</span> TreeMap&lt;&gt;();</div><div class="line">        realNode.stream().forEach(node-&gt;dealNode(node,DEFAULT_NODE_NUM));  <span class="comment">// 每个真实机器节点都需要关联虚拟节点</span></div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="comment">//初始化一致性Hash对象</span></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">initNum</span><span class="params">()</span> </span>&#123;</div><div class="line">        virNode = <span class="keyword">new</span> TreeMap&lt;&gt;();</div><div class="line">        realNode.stream().forEach(node-&gt;dealNode(node,nodeNum)); <span class="comment">// 每个真实机器节点都需要关联虚拟节点</span></div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="comment">//在每一个真实创建 DEFAULT_NODE_NUM个虚拟节点</span></div><div class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">dealNode</span><span class="params">(Node realNode,<span class="keyword">int</span> num)</span> </span>&#123;</div><div class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> n = <span class="number">0</span>; n &lt; num; n++) &#123;</div><div class="line">            <span class="comment">// 一个真实机器节点关联NODE_NUM个虚拟节点</span></div><div class="line">          virNode.put(getHash(realNode.getIPAddress()+<span class="string">"-"</span>+realNode.getName()+<span class="string">"-"</span>+n), realNode);</div><div class="line">          System.out.println(<span class="string">"虚拟节点-"</span>+n+<span class="string">"-被加入到真实节点-"</span>+realNode.getName()+<span class="string">"-hashCode:"</span>+getHash(realNode.getIPAddress()+<span class="string">"-"</span>+realNode.getName()+<span class="string">"-"</span>+n));</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">    <span class="comment">//根据Key去查找真实节点信息</span></div><div class="line">    <span class="function"><span class="keyword">public</span> Node <span class="title">getRealNode</span><span class="params">(String key)</span> </span>&#123;</div><div class="line">        SortedMap&lt;Integer, Node&gt; tail = virNode.tailMap(getHash(key)); <span class="comment">// 沿环的顺时针找到一个虚拟节点</span></div><div class="line">        <span class="keyword">if</span> (tail.size() == <span class="number">0</span>) &#123;</div><div class="line">            <span class="keyword">return</span> virNode.get(virNode.firstKey());</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">return</span> tail.get(tail.firstKey()); <span class="comment">// 返回该虚拟节点对应的真实机器节点的信息</span></div><div class="line">    &#125;</div><div class="line">    <span class="comment">//获取Hash值</span></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Integer <span class="title">getHash</span><span class="params">(String str)</span> </span>&#123;</div><div class="line">        <span class="keyword">return</span> FNVHash1(str);</div><div class="line">    &#125;</div><div class="line">    <span class="comment">/**</span></div><div class="line">     *使用FNV1_32_HASH算法计算服务器的Hash值,这里不使用重写hashCode的方法，最终效果没区别</div><div class="line">     */</div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">int</span> <span class="title">FNVHash1</span><span class="params">(String data)</span> </span>&#123;</div><div class="line">        <span class="keyword">final</span> <span class="keyword">int</span> p = <span class="number">16777619</span>;</div><div class="line">        <span class="keyword">int</span> hash = (<span class="keyword">int</span>) <span class="number">2166136261L</span>;</div><div class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; data.length(); i++)</div><div class="line">            hash = (hash ^ data.charAt(i)) * p;</div><div class="line">        hash += hash &lt;&lt; <span class="number">13</span>;</div><div class="line">        hash ^= hash &gt;&gt; <span class="number">7</span>;</div><div class="line">        hash += hash &lt;&lt; <span class="number">3</span>;</div><div class="line">        hash ^= hash &gt;&gt; <span class="number">17</span>;</div><div class="line">        hash += hash &lt;&lt; <span class="number">5</span>;</div><div class="line">        <span class="comment">// 如果算出来的值为负数则取其绝对值</span></div><div class="line">        <span class="keyword">if</span> (hash &lt; <span class="number">0</span>) hash = Math.abs(hash);</div><div class="line">        <span class="keyword">return</span> hash;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>用于存放数据的Node类</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div></pre></td><td class="code"><pre><div class="line"><span class="comment">/**</span></div><div class="line"> *  用于插入数据的节点</div><div class="line"> */</div><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Node</span> </span>&#123;</div><div class="line"></div><div class="line">    <span class="keyword">private</span> String name; <span class="comment">//名字</span></div><div class="line"></div><div class="line">    <span class="keyword">private</span> String IPAddress;<span class="comment">//IP地址</span></div><div class="line"></div><div class="line">    <span class="keyword">private</span> String Desc;<span class="comment">//描述</span></div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="title">Node</span><span class="params">(String name, String IPAddress, String desc)</span> </span>&#123;</div><div class="line">        <span class="keyword">this</span>.name = name;</div><div class="line">        <span class="keyword">this</span>.IPAddress = IPAddress;</div><div class="line">        Desc = desc;</div><div class="line">    &#125;</div><div class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">getName</span><span class="params">()</span> </span>&#123;</div><div class="line">        <span class="keyword">return</span> name;</div><div class="line">    &#125;</div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setName</span><span class="params">(String name)</span> </span>&#123;</div><div class="line">        <span class="keyword">this</span>.name = name;</div><div class="line">    &#125;</div><div class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">getIPAddress</span><span class="params">()</span> </span>&#123;</div><div class="line">        <span class="keyword">return</span> IPAddress;</div><div class="line">    &#125;</div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setIPAddress</span><span class="params">(String IPAddress)</span> </span>&#123;</div><div class="line">        <span class="keyword">this</span>.IPAddress = IPAddress;</div><div class="line">    &#125;</div><div class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">getDesc</span><span class="params">()</span> </span>&#123;</div><div class="line">        <span class="keyword">return</span> Desc;</div><div class="line">    &#125;</div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setDesc</span><span class="params">(String desc)</span> </span>&#123;</div><div class="line">        Desc = desc;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>用于测试的client类</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ConsistentClient</span> </span>&#123;</div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</div><div class="line">        Node node1=<span class="keyword">new</span> Node(<span class="string">"node1"</span>,<span class="string">"192.168.0.1"</span>,<span class="string">"nice"</span>);</div><div class="line">        Node node2=<span class="keyword">new</span> Node(<span class="string">"node2"</span>,<span class="string">"192.168.0.2"</span>,<span class="string">"bad"</span>);</div><div class="line">        Node node3=<span class="keyword">new</span> Node(<span class="string">"node3"</span>,<span class="string">"192.168.0.3"</span>,<span class="string">"good"</span>);</div><div class="line">        Node node4=<span class="keyword">new</span> Node(<span class="string">"node4"</span>,<span class="string">"192.168.0.4"</span>,<span class="string">"great"</span>);</div><div class="line">        Node node5=<span class="keyword">new</span> Node(<span class="string">"node5"</span>,<span class="string">"192.168.0.5"</span>,<span class="string">"wonderful"</span>);</div><div class="line">        List&lt;Node&gt; readList=<span class="keyword">new</span>  LinkedList();</div><div class="line">        readList.add(node1);</div><div class="line">        readList.add(node2);</div><div class="line">        readList.add(node3);</div><div class="line">        readList.add(node4);</div><div class="line">        readList.add(node5);</div><div class="line">        ConsistentHash consistent=<span class="keyword">new</span> ConsistentHash(readList);</div><div class="line">        consistent.init();</div><div class="line">        List&lt;String&gt; keys=<span class="keyword">new</span> ArrayList&lt;&gt;();</div><div class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> i=<span class="number">0</span>;i&lt; <span class="number">100</span>;i++)&#123;</div><div class="line">            keys.add(<span class="string">"taiyan"</span>+i);</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> i=<span class="number">0</span>; i&lt;keys.size(); i++) &#123;</div><div class="line">            consistent.getRealNode(keys.get(i)).getData().add(keys.get(i));</div><div class="line">            System.out.println(<span class="string">"["</span> + keys.get(i) + <span class="string">"]的hash值为"</span> + consistent.getHash(keys.get(i)) + <span class="string">", 被路由到结点["</span> + consistent.getRealNode(keys.get(i)).getIPAddress() + <span class="string">"]"</span>);</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        <span class="comment">//打印每个节点的数据量</span></div><div class="line">        <span class="keyword">for</span>(Node node:readList)&#123;</div><div class="line">            System.out.println(<span class="string">"Node"</span>+node.getIPAddress()+<span class="string">"的数据"</span>+node.getData().size());</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>运行结果</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">Node192.168.0.1的数据1093</div><div class="line">Node192.168.0.2的数据2411</div><div class="line">Node192.168.0.3的数据2207</div><div class="line">Node192.168.0.4的数据1458</div><div class="line">Node192.168.0.5的数据2831</div></pre></td></tr></table></figure>
+<p>当一个节失效后运行结果</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">Node192.168.0.1的数据1093</div><div class="line">Node192.168.0.2的数据2625</div><div class="line">Node192.168.0.3的数据2675</div><div class="line">Node192.168.0.4的数据3607</div></pre></td></tr></table></figure>
+<p>其实可以对比上面能看出来，节点1的数据没有变化，其中节点2，3，4原来的数据是有增加，而不是集中到一个节点。同时这次数据变动也就只变动了2831个，其他的数据不受任何影响。没有虚拟节点我没有写，但是你可以在ConsistentHash类中删除掉虚拟节点的操作即可。这里也不多的说明</p>
+<h4 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h4><p>常用的算法是对hash结果取余数 (hash() mod N)：对机器编号从0到N-1，按照自定义的hash()算法，对每个请求的hash()值按N取模，得到余数i，然后将请求分发到编号为i的机器。但这样的算法方法存在致命问题，如果某一台机器宕机，那么应该落在该机器的请求就无法得到正确的处理，这时需要将当掉的服务器从算法从去除，此时候会有(N-1)/N的服务器的缓存数据需要重新进行计算；如果新增一台机器，会有N /(N+1)的服务器的缓存数据需要进行重新计算。对于系统而言，这通常是不可接受的颠簸（因为这意味着大量缓存的失效或者数据需要转移）。</p>
+<p>典型的应用场景是： 有N台服务器提供缓存服务，需要对服务器进行负载均衡，将请求平均分发到每台服务器上，每台机器负责1/N的服务。</p>
+<p>一致hash算法，解决了Hash取余算法中，单调性的问题，同时增加虚拟节点的方法，解决了负载的问题，使得数据在机器增加或减少时缓存有更高的利用率。</p>
+<p>但是一致hash算法也有不好的地方，就是数据迁移问题。因为所有数据都分散到各个机器上，没有很好的聚合，所以对于数据迁移是有一定困难。</p>
+<p>所以没有银弹，每一种算法只是解决一种相对应的问题。不要手里拿着锤子，就看什么都是钉子，还是要具体问题具体分析。</p>
+<h4 id="杂记"><a href="#杂记" class="headerlink" title="杂记"></a>杂记</h4><p>首先来说假如key（关键字）是随机分布的，那么无所谓一定要模质数。但在实际中往往关键字有某种规律，例如大量的等差数列，那么公差和模数不互质的时候发生碰撞的概率会变大，而用质数就可以很大程度上回避这个问题。质数并不是唯一的准则。</p>
+<p><a href="http://www.vvbin.com/?p=376" target="_blank" rel="external">一个关于是否要取质数的博客</a></p>
+<p>计算Hash的几种方法</p>
+<ul>
+<li>直接取余法： f(x)=(x+MAX)mod size 其中MAX是一个比较大的数，size是存储空间</li>
+<li>平方取中法：先计算关键字的平方然后有目的的选取中间的若干位作为散列地址。若，假设散列地址范围是[000,999],k=4731则k^2=22382361取第三位至第五位作为其散列地址，则H(k)=382</li>
+<li>叠加法：把关键字分割成位数相同的几部分，如最后一部分位数不够，则左边可以空缺。</li>
+<li>基数转换法：设原关键字是十进制数，人为的当做q进制数，再转换成十进制数作为散列地址。</li>
+<li>除留余数法：设散列范围的长度为m，将关键字值k除以某数p(p&lt;=m)以后所得的余数作为散列地址。对应的散列函数为H(k)=k mod p</li>
+</ul>
+<h4 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h4><p><a href="https://wizardforcel.gitbooks.io/the-art-of-programming-by-july/content/a.3.html" target="_blank" rel="external">一致性哈希算法</a></p>
+<p><a href="https://blog.csdn.net/l1028386804/article/details/54573106default" target="_blank" rel="external">Hash算法大全</a></p>
+<p><a href="https://blog.csdn.net/u011305680/article/details/79721030" target="_blank" rel="external">一致性Hash算法和代码的实现</a></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/java/" rel="tag"># java</a>
+          
+            <a href="/tags/算法/" rel="tag"># 算法</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/08/25/浅析UnSafe类/" rel="next" title="浅析UnSafe">
+                <i class="fa fa-chevron-left"></i> 浅析UnSafe
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zMTk4OS84NTUz"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+      <div id="sidebar-dimmer"></div>
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/img/cluade.jpg"
+                alt="Hill" />
+            
+              <p class="site-author-name" itemprop="name">Hill</p>
+              <p class="site-description motion-element" itemprop="description">Stay Hungary Stay Foolish</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives">
+              
+                  <span class="site-state-item-count">20</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">9</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">14</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          <div class="links-of-author motion-element">
+            
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/ClaudeWilliam" target="_blank" title="GitHub">
+                    
+                      <i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="https://twitter.com/qjqandjack" target="_blank" title="Twitter">
+                    
+                      <i class="fa fa-fw fa-twitter"></i>Twitter</a>
+                </span>
+              
+            
+          </div>
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                Links
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://www.zdfans.com/" title="zd423" target="_blank">zd423</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://www.solidot.org" title="solidot" target="_blank">solidot</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://www.freehao123.com/" title="免费资源部落" target="_blank">免费资源部落</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://coolshell.cn/" title="酷壳" target="_blank">酷壳</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://www.geeksforgeeks.org/" title="GeeksforGeeks" target="_blank">GeeksforGeeks</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#重提Hash"><span class="nav-number">1.</span> <span class="nav-text">重提Hash</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#如何判断一个Hash算法好坏（在分布式环境下）"><span class="nav-number">2.</span> <span class="nav-text">如何判断一个Hash算法好坏（在分布式环境下）</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#平衡性-Balance"><span class="nav-number">2.1.</span> <span class="nav-text">平衡性(Balance)</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#单调性-Monotonicity"><span class="nav-number">2.2.</span> <span class="nav-text">单调性(Monotonicity)</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#分散性-Spread"><span class="nav-number">2.3.</span> <span class="nav-text">分散性(Spread)</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#负载-Load"><span class="nav-number">2.4.</span> <span class="nav-text">负载(Load)</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#什么是一致性Hash算法（Consistent-hashing）"><span class="nav-number">3.</span> <span class="nav-text">什么是一致性Hash算法（Consistent hashing）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#一致性Hash算法，解决了什么问题"><span class="nav-number">4.</span> <span class="nav-text">一致性Hash算法，解决了什么问题</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#一致性Hash算法的应用"><span class="nav-number">5.</span> <span class="nav-text">一致性Hash算法的应用</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#JAVA的简单实现一致性Hash算法"><span class="nav-number">6.</span> <span class="nav-text">JAVA的简单实现一致性Hash算法</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#总结"><span class="nav-number">7.</span> <span class="nav-text">总结</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#杂记"><span class="nav-number">8.</span> <span class="nav-text">杂记</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#参考"><span class="nav-number">9.</span> <span class="nav-text">参考</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Hill</span>
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+  <div style="display: none;">
+    <script src="//s95.cnzz.com/z_stat.php?id=1261941992&web_id=1261941992" language="JavaScript"></script>
+  </div>
+
+
+
+        
+      </div>
+    </footer>
+
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="true"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.3"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+    <script type="text/javascript">
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("Pod0Rp53fwvSwGPDqJs2HyFu-gzGzoHsz", "bF1y2QSbKADBtyveTlWe9ee3");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdn.bootcss.com/mathjax/2.7.1/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+
+
+  
+
+  
+
+</body>
+</html>
