@@ -1,0 +1,50 @@
+# 使用语言
+language: node_js
+# node版本
+node_js: stable
+  - 8.0.0
+# 指定需要sudo权限
+sudo: required
+
+# 缓存，可以节省集成的时间，这里我用了yarn，如果不用可以删除
+cache:
+  apt: true
+  yarn: true
+  directories:
+    - node_modules
+
+# tarvis生命周期执行顺序详见官网文档
+before_install: 
+# 更改时区
+  - export TZ='Asia/Shanghai' 
+# 由于使用了yarn，所以需要下载，如不用yarn这两行可以删除
+  - curl -o- -L https://yarnpkg.com/install.sh | bash
+  - export PATH=$HOME/.yarn/bin:$PATH
+  - npm install -g hexo-cli
+  - npm install hexo-generator-searchdb --save
+  
+install:
+  - yarn
+  #- npm install
+script:
+    # 清除
+    - hexo clean 
+    # 生成
+    - hexo g 
+after_script:
+  - npm ls --depth 0
+  - cd ./public
+  - git init
+  - git config user.name "hill"
+  - git config user.email "qjqandjack@gmail.com"
+  - git add .
+  - git commit -m "Travis CI Auto Builder"
+  - git push --force --quiet "https://${REPO_TOKEN}@${GH_REF}" master:master
+# 设置只监听哪个分支
+branches:
+  only:
+  - source
+# 环境变量
+env:
+ global: 
+   - GH_REF: github.com/ClaudeWilliam/claudewilliam.github.io.git --{仓库地址}
