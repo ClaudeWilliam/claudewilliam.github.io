@@ -1,9 +1,7 @@
----
 title: HTTP协议浅谈
 date: 2019-10-22 09:21:08
 tags: [网络,http]
 categories: http
----
 
 #### 什么是HTTP协议
 
@@ -138,8 +136,6 @@ HTTP 1.1版允许复用TCP连接，但是同一个TCP连接里面，所有的数
 HTTP 1.0情况下 HTTP 协议中每个传输层连接只能承载一个 HTTP 请求和响应，浏览器会在收到上一个请求的响应之后，再发送下一个请求。在使用持久连接的情况下，某个连接上消息的传递类似于`请求1 -> 响应1 -> 请求2 -> 响应2 -> 请求3 -> 响应3`。
 
 ![](https://raw.githubusercontent.com/ClaudeWilliam/pic-blog/master/img/http-pipeline.png)
-
-
 
 HTTP Pipelining（管线化）是将多个 HTTP 请求整批提交的技术，在传送过程中不需等待服务端的回应。使用 HTTP Pipelining 技术之后，某个连接上的消息变成了类似这样`请求1 -> 请求2 -> 请求3 -> 响应1 -> 响应2 -> 响应3`。
 
