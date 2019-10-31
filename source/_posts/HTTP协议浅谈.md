@@ -1,7 +1,9 @@
+---
 title: HTTP协议浅谈
 date: 2019-10-22 09:21:08
-tags: [网络,http]
-categories: http
+tags: [网络,HTTP]
+categories: HTTP
+---
 
 #### 什么是HTTP协议
 
