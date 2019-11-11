@@ -195,15 +195,9 @@ Starter中代码看上去不难，只不过多了好多注解，我这边解释�
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <parent>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.0.4.RELEASE</version>
-        <relativePath/> <!-- lookup parent from repository -->
-    </parent>
     <groupId>com.qjq</groupId>
     <artifactId>just-spring-boot-starter</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>0.0.2-SNAPSHOT</version>
     <name>just-spring-boot-starter</name>
     <description>自定义starter</description>
 
@@ -211,9 +205,14 @@ Starter中代码看上去不难，只不过多了好多注解，我这边解释�
         <java.version>1.8</java.version>
     </properties>
 
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>2.0.4.RELEASE</version>
+    </parent>
     <dependencies>
-        <!-- @ConfigurationProperties annotation processing (metadata for IDEs)
-                     生成spring-configuration-metadata.json类，需要引入此类-->
+        <!--@ConfigurationProperties annotation processing (metadata for IDEs)-->
+        <!--生成spring-configuration-metadata.json类，需要引入此类-->            
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-configuration-processor</artifactId>
@@ -224,16 +223,8 @@ Starter中代码看上去不难，只不过多了好多注解，我这边解释�
             <artifactId>spring-boot-autoconfigure</artifactId>
         </dependency>
         </dependencies>
-
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-            </plugin>
-        </plugins>
-    </build>
 </project>
+
 ```
 
 注意其中 `spring-boot-configuration-processor` 的作用是编译时生成`spring-configuration-metadata.json`， 此文件主要给IDE使用，用于提示使用。如在intellij idea中，当配置此jar相关配置属性在`application.yml`， 你可以用ctlr+鼠标左键，IDE会跳转到你配置此属性的类中。
@@ -290,7 +281,7 @@ public class SimpleBeanProperties {
 ##### 编写注入的Bean
 
 ```java
-package com.qjq.justspringbootstarter;
+package com.just.share.spring.boot.autoconfigure;
 
 public class SimpleService {
 
@@ -311,23 +302,22 @@ public class SimpleService {
      * @return
      */
     public String dealSimple() {
-        return "hello" + name + "world" + filed + "simple" + add;
+        String data ="hello" + name + "world" + filed + "simple" + add;
+        System.out.println(data);
+        return data;
     }
 }
-
 ```
 
 ##### 编写自动注入的类
 
 ```java
-package com.qjq.justspringbootstarter;
-
-
+package com.just.share.spring.boot.autoconfigure;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
 
 @EnableConfigurationProperties(SimpleBeanProperties.class)
 @Configuration
@@ -341,13 +331,11 @@ public class SimpleBeanAutoConfigure {
         this.properties = properties;
     }
     @Bean
-    @Primary
-    @ConditionalOnProperty(prefix = "spring.qjq.just", value = "enabled",havingValue = "true")
+    @ConditionalOnProperty(prefix = "spring.qjq.just",name = "enable",havingValue = "true")
     public SimpleService simpleService(){
        return new SimpleService(properties.getName(),properties.getFiled(),properties.getAdd());
     }
 }
-
 ```
 
 ##### 编写spring.factories文件
