@@ -175,4 +175,3 @@ public class MySharedObject {
 #### 参考
 
 [Java Memory Model](http://tutorials.jenkov.com/java-concurrency/java-memory-model.html)
-
