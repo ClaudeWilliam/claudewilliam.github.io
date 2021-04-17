@@ -1,0 +1,204 @@
+<!DOCTYPE html><html lang="zh-Hans" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Java内存模型 | Hill's Notes</title><meta name="keywords" content="编程,java"><meta name="author" content="Hill"><meta name="copyright" content="Hill"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="Java内存模型(Java  Memory Model)：往往是指Java程序在运行时内存的模型，而Java代码是运行在Java虚拟机之上的，由Java虚拟机通过解释执行(解释器)或编译执行(即时编译器)来完成，虚拟机在执行Java程序的过程中，会把它管理的内存划分为几个不同的数据区域，这些区域都有各自的用途、创建时间、销毁时间。故Java内存模型，也就是指Java虚拟机的运行时内存模型。它包括程">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Java内存模型">
+<meta property="og:url" content="http://yoursite.com/2017/07/27/Java%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B/index.html">
+<meta property="og:site_name" content="Hill&#39;s Notes">
+<meta property="og:description" content="Java内存模型(Java  Memory Model)：往往是指Java程序在运行时内存的模型，而Java代码是运行在Java虚拟机之上的，由Java虚拟机通过解释执行(解释器)或编译执行(即时编译器)来完成，虚拟机在执行Java程序的过程中，会把它管理的内存划分为几个不同的数据区域，这些区域都有各自的用途、创建时间、销毁时间。故Java内存模型，也就是指Java虚拟机的运行时内存模型。它包括程">
+<meta property="og:locale">
+<meta property="og:image" content="http://yoursite.com/img/00005.jpg">
+<meta property="article:published_time" content="2017-07-27T11:23:03.000Z">
+<meta property="article:modified_time" content="2021-04-17T05:13:34.687Z">
+<meta property="article:author" content="Hill">
+<meta property="article:tag" content="编程">
+<meta property="article:tag" content="java">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://yoursite.com/img/00005.jpg"><link rel="shortcut icon" href="/img/flag.jpg"><link rel="canonical" href="http://yoursite.com/2017/07/27/Java%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: 'Copy successfully',
+    error: 'Copy error',
+    noSupport: 'The browser does not support'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  date_suffix: {
+    just: 'Just',
+    min: 'minutes ago',
+    hour: 'hours ago',
+    day: 'days ago',
+    month: 'months ago'
+  },
+  copyright: {"limitCount":50,"languages":{"author":"Author: Hill","link":"Link: ","source":"Source: Hill's Notes","info":"Copyright is owned by the author. For commercial reprints, please contact the author for authorization. For non-commercial reprints, please indicate the source."}},
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    jQuery: 'https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js',
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+    },
+    fancybox: {
+      js: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isanchor: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = { 
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: false,
+  postUpdate: '2021-04-17 13:13:34'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    })(window)</script><meta name="generator" content="Hexo 5.4.0"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="author-avatar"><img class="avatar-img" src="/img/dog.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data"><div class="data-item is-center"><div class="data-item-link"><a href="/archives/"><div class="headline">Articles</div><div class="length-num">38</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/tags/"><div class="headline">Tags</div><div class="length-num">22</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/categories/"><div class="headline">Categories</div><div class="length-num">15</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fa fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fa fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于博主</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('/img/jvm_memory_1.jpg')"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">Hill's Notes</a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fa fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fa fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于博主</span></a></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">Java内存模型</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">Created</span><time class="post-meta-date-created" datetime="2017-07-27T11:23:03.000Z" title="Created 2017-07-27 19:23:03">2017-07-27</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">Updated</span><time class="post-meta-date-updated" datetime="2021-04-17T05:13:34.687Z" title="Updated 2021-04-17 13:13:34">2021-04-17</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/java/">java</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="Java内存模型"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">Post View:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><p>Java内存模型(Java  Memory Model)：往往是指Java程序在运行时内存的模型，而Java代码是运行在Java虚拟机之上的，由Java虚拟机通过解释执行(解释器)或编译执行(即时编译器)来完成，虚拟机在执行Java程序的过程中，会把它管理的内存划分为几个不同的数据区域，这些区域都有各自的用途、创建时间、销毁时间。故Java内存模型，也就是指Java虚拟机的运行时内存模型。它包括程序计数器(Program Counter Register)、虚拟机栈（栈  Stack）、本地方法栈(Native Method Stack)、方法区(Method Area)、堆(Heap)。其实还有常量池，只不过他一般都是在方法区中。</p>
+<p><img src="/img/jvm_memory_1.jpg" alt="jvm_memory"></p>
+<p>Java栈：</p>
+<ul>
+<li> 栈是一种非常常见的数据结构，它采用典型的<strong>先进后出(后进先出 LIFO)<strong>的操作方式完成的。每一个栈都包含一个栈顶，每次出栈是将栈顶的数据取出，同样存数据也是存到栈顶。栈式一块连续的内存区域，大小是有操作系统觉决定的(这个可以在配置文件中配置)。所以栈的大小比较小，远远小于堆。主要存储一些引用和局部变量(基本类型的局部变量)和方法调用信息，也就是每个方法调用被压入栈中，当他运行完的时候(return)被弹出，</strong>每个方法也就是一个栈帧</strong>，所以栈内是有严格的生命周期的，同时当方法调用过多的时候，栈空间不足会抛出java.lang.StackOverFlowError。在Hot Spot虚拟机中，可以使用**-Xss参数来设置栈的大小<strong>。</strong>栈的大小直接决定了函数调用的可达深度**</li>
+<li> Java<strong>栈总是与线程关联在一起的</strong>，每当创建一个线程，JVM就会为该线程创建对应的Java栈，<strong>在这个Java栈中又会包含多个栈帧(Stack Frame)，这些栈帧是与每个方法关联起来的，每运行一个方法就创建一个栈帧，每个栈帧会含有一些局部变量、操作栈和方法返回值等信息</strong>。每当一个方法执行完成时，该栈帧就会弹出栈帧的元素作为这个方法的返回值，并且清除这个栈帧，Java栈的栈顶的栈帧就是当前正在执行的活动栈，也就是当前正在执行的方法，PC寄存器也会指向该地址。只有这个活动的栈帧的本地变量可以被操作栈使用，当在这个栈帧中调用另外一个方法时，与之对应的一个新的栈帧被创建，这个新创建的栈帧被放到Java栈的栈顶，变为当前的活动栈。同样现在只有这个栈的本地变量才能被使用，当这个栈帧中所有指令都完成时，这个栈帧被移除Java栈，刚才的那个栈帧变为活动栈帧，前面栈帧的返回值变为这个栈帧的操作栈的一个操作数。<strong>所以Java栈是线程是不共享的，而堆内的数据是共享的</strong></li>
+<li> 由于Java栈是与线程对应起来的，Java栈数据不是线程共有的，所以不需要关心其数据一致性，也不会存在同步锁的问题。</li>
+<li>栈帧(Stack Frame)由三部分组成：<strong>局部变量区、操作数栈、帧数据区</strong>(动态链接方法，返回地址，额外的信息)。局部变量区和操作数栈的大小要视对应的方法而定，他们是按字长计算的。但调用一个方法时，它从类型信息中得到此方法局部变量区和操作数栈大小，并据此分配栈内存，然后压入Java栈。<ul>
+<li>局部变量表 (locals大小，编译期确定)，一组变量存储空间， 容量以slot为最小单位。</li>
+<li>操作栈(stack大小，编译期确定)，操作栈元素的数据类型必须与字节码指令序列严格匹配</li>
+<li>动态连接， 指向运行时常量池中该栈帧所属方法的引用，为了 动态连接使用。<ul>
+<li>前面的解析过程其实是静态解析；</li>
+<li>对于运行期转化为直接引用，称为动态解析。</li>
+</ul>
+</li>
+<li>方法返回地址<ul>
+<li>正常退出，执行引擎遇到方法返回的字节码，将返回值传递给调用者</li>
+<li>异常退出，遇到Exception,并且方法未捕捉异常，那么不会有任何返回值。</li>
+</ul>
+</li>
+<li>额外附加信息，虚拟机规范没有明确规定，由具体虚拟机实现。</li>
+</ul>
+</li>
+</ul>
+<p>Java堆：</p>
+<ul>
+<li><p>Java的堆，是用来存储真正的对象，<strong>即new的时候向内存申请的地方，Java是自动分配，他存储对象真正的信息</strong>。Java中通过引用去访问对象，即通过栈中的引用（存的是堆中的地址来拿到堆中的数据，这一点和C语言的指针很想，不过在Java中对堆的内存回收和处理都是通过JVM的GC(Garbage Collection)来处理内存。从内存回收的角度来看，由于现在GC基本都采用分代收集算法，所以Java堆还可以细分为：新生代和老年代；新生代再细致一点有Eden空间、From Survivor空间、To Survivor空间等。</p>
+<ul>
+<li>从内存回收角度，Java堆被分为新生代和老年代；这样划分的好处是为了更快的回收内存；</li>
+<li>从内存分配角度，Java堆可以划分出线程私有的分配缓冲区(Thread Local Allocation Buffer,TLAB)；这样划分的好处是为了更快的分配内存；</li>
+</ul>
+</li>
+<li><p><strong>堆内存用来存储Java中的对象。无论是成员变量，局部变量，还是类变量，它们指向的对象都存储在堆内存中</strong>。堆空间不足会抛出异常java.lang.OutOfMemoryError。他是线程共享，每一线程都去堆（heap）去取值，是被所有Java线程锁共享的，也就是线程不安全的。关于在堆上内存分配是并发进行的，虚拟机采用CAS加失败重试保证原子操作，或者是采用每个线程预先分配TLAB内存。</p>
+</li>
+<li><p>对象创建的过程是在堆上分配着实例对象，那么对象实例的具体结构如下：对于填充数据不是一定存在的，仅仅是为了字节对齐。HotSpot VM的自动内存管理要求对象起始地址必须是8字节的整数倍。对象头本身是8的倍数，当对象的实例数据不是8的倍数，便需要填充数据来保证8字节的对齐。该功能类似于高速缓存行的对齐。</p>
+<p><img src="/img/java_object.jpg" alt="java_object"></p>
+</li>
+</ul>
+<p>方法区：</p>
+<ul>
+<li><strong>方法区存放了要加载的类的信息（名称、修饰符等）、类中的静态常量、类中定义为final类型的常量、类中的Field信息、类中的方法信息</strong>，当在程序中通过Class对象的getName.isInterface等方法来获取信息时，这些数据都来源于方法区。方法区是被Java线程锁共享的，不像Java堆中其他部分一样会频繁被GC回收，它存储的信息相对比较稳定，在一定条件下会被GC，当方法区要使用的内存超过其允许的大小时，会抛出OutOfMemory的错误信息。方法区也是堆中的一部分，就是我们通常所说的Java堆中的永久区 Permanet Generation，大小可以通过参数来设置,可以通过-XX:PermSize指定初始值，-XX:MaxPermSize指定最大值，在java 8中移除方法区增加了MetaData区，也就是元数据区。</li>
+</ul>
+<p>PC寄存器/程序计数器：</p>
+<ul>
+<li><strong>当前线程所执行的字节码行号指示器</strong>，严格来说是一个数据结构，用于保存当前正在执行的程序的内存地址，由于Java是支持多线程执行的，所以程序执行的轨迹不可能一直都是线性执行。当有多个线程交叉执行时，被中断的线程的程序当前执行到哪条内存地址必然要保存下来，以便用于被中断的线程恢复执行时再按照被中断时的指令地址继续执行下去。<strong>为了线程切换后能恢复到正确的执行位置，每个线程都需要有一个独立的程序计数器，各个线程之间计数器互不影响，独立存储，我们称这类内存区域为“线程私有”的内存,这在某种程度上有点类似于“ThreadLocal”，是线程安全的。</strong></li>
+<li>当线程正在执行一个Java方法时，PC计数器记录的是正在执行的虚拟机字节码的地址；当线程正在执行的一个Native方法时，PC计数器则为空（Undefined）</li>
+</ul>
+<p>常量池：</p>
+<ul>
+<li>常量池本身是方法区中的一个数据结构。常量池中存储了如<strong>字符串、final变量值、类名和方法名常量</strong>。<strong>常量池在编译期间就被确定，并保存在已编译的.class文件中</strong>。一般分为两类：字面量和应用量。字面量就是字符串、final变量等。类名和方法名属于引用量。引用量最常见的是在调用方法的时候，根据方法名找到方法的引用，并以此定为到函数体进行函数代码的执行。引用量包含：类和接口的权限定名、字段的名称和描述符，方法的名称和描述符。</li>
+</ul>
+<p>本地方法栈：</p>
+<ul>
+<li>本地方法栈和Java栈所发挥的作用非常相似，<strong>区别不过是Java栈为JVM执行Java方法服务</strong>，<strong>而本地方法栈为JVM执行Native方法服务</strong>。本地方法栈也会抛出StackOverflowError和OutOfMemoryError异常。</li>
+</ul>
+<p>下面是详细的图片介绍：</p>
+<p><img src="/img/stack_heap_info.jpg" alt="stack_heap_info"></p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">Author: </span><span class="post-copyright-info"><a href="mailto:undefined">Hill</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">Link: </span><span class="post-copyright-info"><a href="http://yoursite.com/2017/07/27/Java%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B/">http://yoursite.com/2017/07/27/Java%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">Copyright Notice: </span><span class="post-copyright-info">All articles in this blog are licensed under <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> unless stating additionally.</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E7%BC%96%E7%A8%8B/">编程</a><a class="post-meta__tags" href="/tags/java/">java</a></div><div class="post_share"><div class="social-share" data-image="/img/00005.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2017/08/06/%E9%B8%A1%E6%B1%A4%E9%9A%8F%E7%AC%94/"><img class="prev-cover" src="/img/00017.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">Previous Post</div><div class="prev_info">为什么你一直没有成就（来干了这碗鸡汤）</div></div></a></div><div class="next-post pull-right"><a href="/2017/06/17/%E4%BA%8B%E5%8A%A1/"><img class="next-cover" src="/img/00012.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">Next Post</div><div class="next_info">事务</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span> Related Articles</span></div><div class="relatedPosts-list"><div><a href="/2017/09/17/LinkedHashMap/" title="LinkedHashMap"><img class="cover" src="/img/00008.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2017-09-17</div><div class="title">LinkedHashMap</div></div></a></div><div><a href="/2017/10/25/ArrayQueue/" title="ArrayBlockingQueue"><img class="cover" src="/img/00002.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2017-10-25</div><div class="title">ArrayBlockingQueue</div></div></a></div><div><a href="/2018/08/25/浅析UnSafe类/" title="浅析UnSafe"><img class="cover" src="/img/00025.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2018-08-25</div><div class="title">浅析UnSafe</div></div></a></div><div><a href="/2018/10/25/浅析函数式编程与Java的Lambda/" title="函数式编程与Java的Lambda"><img class="cover" src="/img/00026.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2018-10-25</div><div class="title">函数式编程与Java的Lambda</div></div></a></div><div><a href="/2017/05/14/HashMap/" title="HashMap"><img class="cover" src="/img/00004.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2017-05-14</div><div class="title">HashMap</div></div></a></div><div><a href="/2017/05/14/Java语法糖/" title="Java语法糖"><img class="cover" src="/img/00007.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2017-05-14</div><div class="title">Java语法糖</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="card-info-avatar is-center"><img class="avatar-img" src="/img/dog.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/><div class="author-info__name">Hill</div><div class="author-info__description">Stay Hungary Stay Foolish</div></div><div class="card-info-data"><div class="card-info-data-item is-center"><a href="/archives/"><div class="headline">Articles</div><div class="length-num">38</div></a></div><div class="card-info-data-item is-center"><a href="/tags/"><div class="headline">Tags</div><div class="length-num">22</div></a></div><div class="card-info-data-item is-center"><a href="/categories/"><div class="headline">Categories</div><div class="length-num">15</div></a></div></div><a class="button--animated" id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/ClaudeWilliam"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="https://github.com/ClaudeWilliam" target="_blank" title="github"><i class="GitHub"></i></a><a class="social-icon" href="https://twitter.com/qjqandjack" target="_blank" title="twitter"><i class="Twitter"></i></a></div></div><div class="sticky_layout"><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>Recent Post</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2020/10/16/MySQL%E4%B8%AD%E7%9A%84binlog%E3%80%81redolog/" title="MySQL中的binlog、redolog"><img src="/img/00001.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="MySQL中的binlog、redolog"/></a><div class="content"><a class="title" href="/2020/10/16/MySQL%E4%B8%AD%E7%9A%84binlog%E3%80%81redolog/" title="MySQL中的binlog、redolog">MySQL中的binlog、redolog</a><time datetime="2020-10-16T02:21:08.000Z" title="Created 2020-10-16 10:21:08">2020-10-16</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2020/09/16/%E6%B5%85%E5%85%A5%E6%B5%85%E5%87%BARocketMQ/" title="浅入浅出RocketMQ"><img src="/img/00017.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="浅入浅出RocketMQ"/></a><div class="content"><a class="title" href="/2020/09/16/%E6%B5%85%E5%85%A5%E6%B5%85%E5%87%BARocketMQ/" title="浅入浅出RocketMQ">浅入浅出RocketMQ</a><time datetime="2020-09-16T01:21:08.000Z" title="Created 2020-09-16 09:21:08">2020-09-16</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2020/08/16/%E6%B5%85%E8%B0%88%E6%B3%9B%E5%9E%8B/" title="泛型"><img src="/img/00022.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="泛型"/></a><div class="content"><a class="title" href="/2020/08/16/%E6%B5%85%E8%B0%88%E6%B3%9B%E5%9E%8B/" title="泛型">泛型</a><time datetime="2020-08-16T01:21:08.000Z" title="Created 2020-08-16 09:21:08">2020-08-16</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2020/07/16/Java%E7%9A%84ClassLoader/" title="Java的ClassLoader"><img src="/img/back.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Java的ClassLoader"/></a><div class="content"><a class="title" href="/2020/07/16/Java%E7%9A%84ClassLoader/" title="Java的ClassLoader">Java的ClassLoader</a><time datetime="2020-07-16T01:21:08.000Z" title="Created 2020-07-16 09:21:08">2020-07-16</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2020/05/16/%E6%B5%85%E8%B0%88Redis%E5%BA%95%E5%B1%82-SkipList/" title="浅谈Redis底层-SkipList"><img src="/img/00021.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="浅谈Redis底层-SkipList"/></a><div class="content"><a class="title" href="/2020/05/16/%E6%B5%85%E8%B0%88Redis%E5%BA%95%E5%B1%82-SkipList/" title="浅谈Redis底层-SkipList">浅谈Redis底层-SkipList</a><time datetime="2020-05-16T01:21:08.000Z" title="Created 2020-05-16 09:21:08">2020-05-16</time></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2017 - 2021 By Hill</div><div class="framework-info"><span>Framework </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>Theme </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="Read Mode"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="Toggle Between Light And Dark Mode"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="Toggle between single-column and double-column"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="Setting"><i class="fas fa-cog fa-spin"></i></button><button id="go-up" type="button" title="Back To Top"><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><div class="js-pjax"></div><canvas class="fireworks" mobile="false"></canvas><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/dist/fireworks.min.js"></script><script defer="defer" id="ribbon" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/dist/canvas-ribbon.min.js" size="150" alpha="0.6" zIndex="-1" mobile="false" data-click="false"></script><script defer="defer" id="fluttering_ribbon" mobile="true" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/dist/canvas-fluttering-ribbon.min.js"></script><script id="canvas_nest" defer="defer" color="0,0,255" opacity="0.7" zIndex="-1" count="99" mobile="false" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/dist/canvas-nest.min.js"></script><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/dist/activate-power-mode.min.js"></script><script>POWERMODE.colorful = true;
+POWERMODE.shake = true;
+POWERMODE.mobile = false;
+document.body.addEventListener('input', POWERMODE);
+</script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

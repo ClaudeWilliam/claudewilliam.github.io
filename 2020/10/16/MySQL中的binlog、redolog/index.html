@@ -1,0 +1,286 @@
+<!DOCTYPE html><html lang="zh-Hans" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>MySQL中的binlog、redolog | Hill's Notes</title><meta name="keywords" content="MySQL"><meta name="author" content="Hill"><meta name="copyright" content="Hill"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="前言对MySQL有些了解的人一定知道MySQL不是直接把数据直接写到数据表上，而是先写到日志上，在从日志信息同步到对应的数据库文件。所以MySQL中有很多关于数据存储的日志文件，当然也有很多MySQL运行时的日志，比如错误日志、查询日志、慢查询日志等等。我们这次主要想说一些关于MySQL存储数据的日志。比如二进制日志bin log和事务日志（InnoDB存储引擎）redo log这两种日志。 WA">
+<meta property="og:type" content="article">
+<meta property="og:title" content="MySQL中的binlog、redolog">
+<meta property="og:url" content="http://yoursite.com/2020/10/16/MySQL%E4%B8%AD%E7%9A%84binlog%E3%80%81redolog/index.html">
+<meta property="og:site_name" content="Hill&#39;s Notes">
+<meta property="og:description" content="前言对MySQL有些了解的人一定知道MySQL不是直接把数据直接写到数据表上，而是先写到日志上，在从日志信息同步到对应的数据库文件。所以MySQL中有很多关于数据存储的日志文件，当然也有很多MySQL运行时的日志，比如错误日志、查询日志、慢查询日志等等。我们这次主要想说一些关于MySQL存储数据的日志。比如二进制日志bin log和事务日志（InnoDB存储引擎）redo log这两种日志。 WA">
+<meta property="og:locale">
+<meta property="og:image" content="http://yoursite.com/img/00001.png">
+<meta property="article:published_time" content="2020-10-16T02:21:08.000Z">
+<meta property="article:modified_time" content="2021-04-17T04:31:17.855Z">
+<meta property="article:author" content="Hill">
+<meta property="article:tag" content="MySQL">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://yoursite.com/img/00001.png"><link rel="shortcut icon" href="/img/flag.jpg"><link rel="canonical" href="http://yoursite.com/2020/10/16/MySQL%E4%B8%AD%E7%9A%84binlog%E3%80%81redolog/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: 'Copy successfully',
+    error: 'Copy error',
+    noSupport: 'The browser does not support'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  date_suffix: {
+    just: 'Just',
+    min: 'minutes ago',
+    hour: 'hours ago',
+    day: 'days ago',
+    month: 'months ago'
+  },
+  copyright: {"limitCount":50,"languages":{"author":"Author: Hill","link":"Link: ","source":"Source: Hill's Notes","info":"Copyright is owned by the author. For commercial reprints, please contact the author for authorization. For non-commercial reprints, please indicate the source."}},
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    jQuery: 'https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js',
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+    },
+    fancybox: {
+      js: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isanchor: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = { 
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2021-04-17 12:31:17'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    })(window)</script><meta name="generator" content="Hexo 5.4.0"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="author-avatar"><img class="avatar-img" src="/img/dog.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data"><div class="data-item is-center"><div class="data-item-link"><a href="/archives/"><div class="headline">Articles</div><div class="length-num">38</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/tags/"><div class="headline">Tags</div><div class="length-num">22</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/categories/"><div class="headline">Categories</div><div class="length-num">15</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fa fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fa fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于博主</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('/img/00001.png')"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">Hill's Notes</a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fa fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fa fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于博主</span></a></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">MySQL中的binlog、redolog</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">Created</span><time class="post-meta-date-created" datetime="2020-10-16T02:21:08.000Z" title="Created 2020-10-16 10:21:08">2020-10-16</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">Updated</span><time class="post-meta-date-updated" datetime="2021-04-17T04:31:17.855Z" title="Updated 2021-04-17 12:31:17">2021-04-17</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/MySQL/">MySQL</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="MySQL中的binlog、redolog"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">Post View:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>对MySQL有些了解的人一定知道MySQL不是直接把数据直接写到数据表上，而是先写到日志上，在从日志信息同步到对应的数据库文件。所以MySQL中有很多关于数据存储的日志文件，当然也有很多MySQL运行时的日志，比如错误日志、查询日志、慢查询日志等等。我们这次主要想说一些关于MySQL存储数据的日志。比如二进制日志bin log和事务日志（InnoDB存储引擎）redo log这两种日志。</p>
+<h4 id="WAL机制"><a href="#WAL机制" class="headerlink" title="WAL机制"></a>WAL机制</h4><p>WAL：（Write-Ahead Logging 预写日志），上面我们说MySQL存储到表数据前是把数据以日志形式记录下来。这种方式有好处就是可以提高部分MySQL性能，同时在备份和还原数据记录有可以有很多日志可以帮DBA更好的完成工作（crash recovery）。但是也有不好地方，就是会产生脏数据产生锁冲突，大量日志文件也占用了IO资源。下面我们详细说下WAL机制。（不过也不详细，毕竟不是DBA）</p>
+<p>用户如果对数据库中的数据进行了修改，必须保证日志先于数据落盘。当日志落盘后，就可以给用户返回操作成功，并不需要保证当时对数据的修改也落盘。如果数据库在日志落盘前crash，那么相应的数据修改会回滚。在日志落盘后crash，会保证相应的修改不丢失。有一点要注意，虽然日志落盘后，就可以给用户返回操作成功，但是由于落盘和返回成功包之间有一个微小的时间差，所以即使用户没有收到成功消息，修改也可能已经成功了，这个时候就需要用户在数据库恢复后，通过再次查询来确定当前的状态。</p>
+<p>WAL提高性能，保证数据完整（crash recovery）</p>
+<p>当日志落盘，直接返回用户操作成功。日志时顺序IO对日志操作肯定快于对表的操作，表查找数据时随机IO（不过后面也要去做表数据更新）。这样直接返回给用户，提高了MySQL并发（类似于RocketMQ削峰填谷）。后面统一批量处理日志将数据记录更新到具体的表里。同时所有对数据操作都有日志记录，数据只要落在日志就可以了。数据相对于日志，它并不决定数据的安全。</p>
+<p>WAL也存在问题</p>
+<p>一、大量日志刷盘问题。</p>
+<p>由于所有对数据的修改都需要写日志，当并发量很大的时候，必然会导致日志的写入量也很大，为了性能考虑，往往需要先写到一个日志缓冲区，然后再按照一定规则刷入磁盘，此外日志缓冲区大小有限，而用户会源源不断的生产日志，数据库需要不断的把缓存区中的日志刷入磁盘，缓存区才可以复用，由此可见，这里构成了一个典型的生产者和消费者模型。现代数据库必须直面这个问题，在高并发的情况下，这一定是个性能瓶颈，也一定是个锁冲突的热点。</p>
+<p>引入mtr，多次缓存提交（先提交私有缓存合并，提交到全局缓存，在刷盘）</p>
+<p>当用户线程产生日志的时候，首先缓存在一个mtr，只有完成某些原子操作(例如完成索引分裂或者合并等)的时候，才把日志提交到全局的日志缓存区中。全局缓存区的大小(innodb_log_file_size)可以动态配置。当线程的事务执行完后，会按照当前的配置(innodb_flush_log_at_trx_commit)决定是否需要把日志从缓冲区刷到磁盘。（后面会介绍mtr）</p>
+<p>二、大量数据刷盘问题。（MySQL底层的数据是按照页存储）</p>
+<p>在用户收到操作成功的时候，用户的数据不一定已经被持久化了，很有可能修改还没有落盘，这就需要数据库有一套刷数据的机制，专业术语叫做刷脏页算法。<strong>脏页(内存中被修改的但是还没落盘的数据页)<strong>在源源不断的产生，然后要持续的刷入磁盘，这里又凑成一个生产者消费者模型，影响数据库的性能。如果在脏页没被刷入磁盘，但是数据库异常crash了，这个就需要做奔溃恢复，具体的流程是，在接受用户请求之前，从checkpoint点(这个点之前的日志对应的数据页一定已经持久化到磁盘了)开始扫描日志，然后应用日志，从而把在内存中丢失的更新找回来，最后重新刷入磁盘。这里有一个很重要的点：在数据库正常启动的期间，checkpoint怎么确定，如果checkpoint做的慢了，就会导致崩溃恢复时间过长，从而影响数据库可用性，如果做的快了，会导致刷脏压力过大，甚至数据丢失。</strong>MySQL 从 内存更新到磁盘的过程，称为刷脏页的过程（flush）</strong></p>
+<p>脏页数据链表，保证脏页的有序性通过oldest_modification确定刷入时间。</p>
+<p>当把日志成功拷贝到全局日志缓冲区后，会继续把当前已经被修改过的脏页加入到一个全局的脏页链表中。这个链表有一个特性：按照最早被修改的时间排序。例如，有数据页A,B,C，数据页A早上9点被第一次修改，数据页B早上9点01分被第一次修改，数据页C早上9点02分被第一次修改，那么在这个链表上数据页A在最前，B在中间，C在最后。即使数据页A在早上9点之后又一次被修改了，他依然排在B和C之前。在数据页上，有一个字段来记录这个最早被修改的时间：oldest_modification，只不过单位不是时间，而是lsn，即从数据库初始化开始，一共写了多少个字节的日志，由于其是一个递增的值，因此可以理解为广义的时间，先写的数据，其产生的日志对应的lsn一定比后写的小。在脏页列表上的数据页，就是按照oldest_modification从小到大排序，刷脏页的时候，就从oldest_modification小的地方开始。checkpoint就是脏页列表中最小的那个oldest_modification，因为这种机制保证小于最小oldest_modification的修改都已经刷入磁盘了。这里最重要的是，脏页链表的有序性。</p>
+<p>数据库crash导致数据丢失</p>
+<p>假设这个有序性被打破了，如果数据库异常crash，就会导致数据丢失。例如，数据页ABC的oldest_modification分别为120，100，150，同时在脏页链表上的顺序依然为A，B，C，A在最前面，C在最后面。数据页A被刷入磁盘，然后checkpoint被更新为120，但是数据页B和C都还没被刷入磁盘，这个时候，数据库crash，重启后，从checkpoint为120开始扫描日志，然后恢复数据，我们会发现，数据页C的修改被恢复了，但是数据页B的修改丢失了。</p>
+<p>上面扯了那么多，其实在InnoDB上就是redo log。下面我们详细说下redo log，所有的脏页数据也就存在redo log，刷脏页也就是刷redo log。</p>
+<h4 id="mtr（Mini-Transaction）"><a href="#mtr（Mini-Transaction）" class="headerlink" title="mtr（Mini-Transaction）"></a>mtr（Mini-Transaction）</h4><p>设计MySQL的⼤叔把对底层⻚⾯中的⼀次原⼦访问的过程称之为⼀个Mini-Transaction，简称mtr。⼀个所谓的mtr可以包含⼀组redo log，在进⾏崩溃恢复时这⼀组redo log作为⼀个不可分割的整体。⼀个事务可以包含若⼲条语句，每⼀条语句其实是由若⼲个mtr组成，每⼀个mtr⼜可以包含若⼲条redo log。</p>
+<p>如何保证mtr的不可分割：</p>
+<p>在该组中的最后⼀条redo log后边加上⼀条特殊类型的redo log，该类型名称为MLOG_MULTI_REC_END。所以某个需要保证原⼦性的操作产⽣的⼀系列redo log必须要以⼀个类型为MLOG_MULTI_REC_END结尾，只有当解析到类型为MLOG_MULTI_REC_END的redo log，才认为解析到了⼀组完整的redo log，才会进⾏恢复。否则的话直接放弃前边解析到的redo log。</p>
+<p>什么样的操作是不可分割的操作：</p>
+<p>更新Max Row ID属性时产⽣的redo log是不可分割的。</p>
+<p>向聚簇索引对应B+树的⻚⾯中插⼊⼀条记录时产⽣的redo log是不可分割的。</p>
+<p>向某个⼆级索引对应B+树的⻚⾯中插⼊⼀条记录时产⽣的redo log是不可分割的。</p>
+<h4 id="redo-log"><a href="#redo-log" class="headerlink" title="redo log"></a>redo log</h4><h5 id="redo-log基本结构"><a href="#redo-log基本结构" class="headerlink" title="redo log基本结构"></a>redo log基本结构</h5><p>redo log占⽤的空间⾮常⼩ 存储表空间ID、⻚号、偏移量以及需要更新的值所需的存储空间是很⼩的。 redo log是顺序写⼊磁盘的 在执⾏事务的过程中，每执⾏⼀条语句，就可能产⽣若⼲ 条redo log，redo log是按照产⽣的顺序写⼊磁盘的，也就是使⽤顺序IO。</p>
+<p>redo log的通用格式，redo log本质上只是记录了⼀下事务对数据库做了哪些修改，存放的是物理日志。物理日志（<code>mysql</code> 数据最终是保存在数据页中的，物理日志记录的就是数据页变更）</p>
+<p>type：redo log类型。space ID：表空间ID。pageNumber：页号。data：redo log具体内容。</p>
+<p><img src="https://raw.githubusercontent.com/ClaudeWilliam/pic-blog/master/img/redolog-04.png"></p>
+<p>redo log分成两部分，一个是内存中的日志缓冲( <code>redo log buffer</code>)，另一个是磁盘上的日志文件( <code>redo logfile</code>)。</p>
+<h5 id="redo-log-WAL的实现"><a href="#redo-log-WAL的实现" class="headerlink" title="redo log WAL的实现"></a>redo log WAL的实现</h5><p>MySQL 每执行一条 <code>DML</code> 语句，先将记录写入 <code>redo log buffer</code>，后续某个时间点再一次性将多个操作记录写到 <code>redo log file</code>。这种 <strong>先写日志，再写磁盘</strong> 的技术就是 我们上面常说到的 <code>WAL(Write-Ahead Logging)</code> 技术。</p>
+<p>在计算机操作系统中，用户空间( <code>user space</code> )下的缓冲区数据一般情况下是无法直接写入磁盘的，中间必须经过操作系统内核空间( <code>kernel space</code> )的缓冲区( <code>OS Buffer</code> )。</p>
+<p>因此， <code>redo log buffer</code> 写入 <code>redo logfile</code> 实际上是先写入 <code>OS Buffer</code> ，然后再通过系统调用 <code>fsync()</code> 将其刷到 <code>redo log file</code>中，过程如下：</p>
+<p><img src="https://raw.githubusercontent.com/ClaudeWilliam/pic-blog/master/img/redolog-01.jpg"></p>
+<p>MySQL 支持三种将 <code>redo log buffer</code> 写入 <code>redo log file</code> 的时机，可以通过 <code>innodb_flush_log_at_trx_commit</code> 参数值配置。</p>
+<table>
+<thead>
+<tr>
+<th>参数值</th>
+<th>参数值含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>0 延迟写</td>
+<td>提交事务时不会将redo log buffer中的日志写到 os buffer。而且每次也不都是提交时写入，而是每1s钟写入os buffer并调用fsync()刷入redo log file。也就是设置为0的时候，数据每1s落一次盘，如果MySQL在这个时候宕机会丢失1s的数据。</td>
+</tr>
+<tr>
+<td>1 实时写 实时刷</td>
+<td>每次事务提交都会将redo log buffer中的日志写入os buffer 并调用 fsync()刷入到 redo log file。这种方法即使系统崩溃也不会丢失数据，但每次提交都写入磁盘，IO性能比较差</td>
+</tr>
+<tr>
+<td>2 实时写 延时刷</td>
+<td>每次提价都仅写入到os buffer，然后每1s调用fsync()将os buffer中的日志刷入到redo log file</td>
+</tr>
+</tbody></table>
+<p>如图所示</p>
+<p><img src="https://raw.githubusercontent.com/ClaudeWilliam/pic-blog/master/img/redolog-02.jpg"></p>
+<p>在主从复制结构中，要保证事务的持久性和一致性，需要对日志相关变量设置为如下：</p>
+<ul>
+<li><strong>如果启用了二进制日志，则设置sync_binlog=1，即每提交一次事务同步写到磁盘中。</strong></li>
+<li><strong>总是设置innodb_flush_log_at_trx_commit=1，即每提交一次事务都写到磁盘中。</strong></li>
+</ul>
+<p>上述两项变量的设置保证了：每次提交事务都写入二进制日志和事务日志，并在提交时将它们刷新到磁盘中。</p>
+<p>不过一般都不会用参数0一般，因为0和2的效率差不多，在没有主从同步的情况下，可以使用2。1是可以保证数据可靠性但是性能会差好多。</p>
+<p>上面每1s刷入数据是InnoDB 有一个后台线程，就会把 redo log buffer 中的日志，调用 write 写到文件系统的 page cache，然后调用 fsync 持久化到磁盘。也就是WAL中解决大量日志刷盘方法的实现。WAL中提到的就是参数配置为0时候的解决方法。不过它提供了多种选择我们可以每次提交时候在刷盘。</p>
+<h5 id="redo-log-格式"><a href="#redo-log-格式" class="headerlink" title="redo log 格式"></a>redo log 格式</h5><p><code>redo log</code> 实际上记录数据页的变更，而这种变更记录是没必要全部保存，因此 <code>redo log</code>实现上采用了大小固定，循环写入的方式，当写到结尾时，会回到开头循环写日志。在innodb中，既有<code>redo log</code> 需要刷盘，还有 <code>数据页</code> 也需要刷盘， <code>redo log</code>存在的意义主要就是降低对数据页刷盘的要求。</p>
+<p><img src="https://raw.githubusercontent.com/ClaudeWilliam/pic-blog/master/img/redolog-03.jpg"></p>
+<p>磁盘上的redo⽇志⽂件不只⼀个，⽽是以⼀个⽇志⽂件组的形式出现的。这些⽂件以ib_logfile[数字]（数字可以是0、1、2…）的形式进⾏命名。在将redo log写⼊⽇志⽂件组时，是从ib_logfile0开始写，一直写到文件最大哦，从图中我们能看出来这个是环，也就是后面的redo log日志会覆盖前面的redo log日志。</p>
+<p>在上图中， <code>write pos</code> 表示 <code>redo log</code> 当前记录的 <code>LSN</code> (逻辑序列号)位置， <code>check point</code> 表示 <strong>数据页更改记录</strong> 刷盘后对应 <code>redo log</code> 所处的 <code>LSN</code>(逻辑序列号)位置。</p>
+<p><code>write pos</code> 到 <code>check point</code> 之间的部分是 <code>redo log</code> 空着的部分，用于记录新的记录；<code>check point</code> 到 <code>write pos</code> 之间是 <code>redo log</code> 待落盘的数据页更改记录。当 <code>write pos</code>追上<code>check point</code> 时，会先推动 <code>check point</code> 向前移动，空出位置再记录新的日志。</p>
+<p>启动 <code>innodb</code> 的时候，不管上次是正常关闭还是异常关闭，总是会进行恢复操作。因为 <code>redo log</code>记录的是数据页的物理变化，因此恢复的时候速度比逻辑日志(如 <code>binlog</code> )要快很多。</p>
+<p>重启<code>innodb</code> 时，首先会检查磁盘中数据页的 <code>LSN</code> ，如果数据页的<code>LSN</code> 小于日志中的 <code>LSN</code> ，则会从 <code>checkpoint</code> 开始恢复。</p>
+<p>还有一种情况，在宕机前正处于<code>checkpoint</code> 的刷盘过程，且数据页的刷盘进度超过了日志页的刷盘进度，此时会出现数据页中记录的 <code>LSN</code> 大于日志中的 <code>LSN</code>，这时超出日志进度的部分将不会重做，因为这本身就表示已经做过的事情，无需再重做。</p>
+<h4 id="bin-log"><a href="#bin-log" class="headerlink" title="bin log"></a>bin log</h4><p>bin log：（binary log）二进制日志，<code>binlog</code> 用于记录数据库执行的写入性操作(不包括查询)信息，以二进制的形式保存在磁盘中。<code>binlog</code> 是 <code>mysql</code>的逻辑日志，并且由 <code>Server</code> 层进行记录，使用任何存储引擎的 <code>mysql</code> 数据库都会记录 <code>binlog</code> 日志。逻辑日志（可以简单理解为记录的就是sql语句）与上面redo log物理日志对应。</p>
+<p><code>binlog</code> 是通过追加的方式进行写入的，可以通过<code>max_binlog_size</code> 参数设置每个 <code>binlog</code>文件的大小，当文件大小达到给定值之后，会生成新的文件来保存日志  。</p>
+<p><code>binlog</code> 的主要使用场景有两个，分别是 <strong>主从复制</strong> 和 <strong>数据恢复</strong> 。</p>
+<p>主从复制：在 <code>Master</code> 端开启 <code>binlog</code> ，然后将 <code>binlog</code>发送到各个 <code>Slave</code> 端， <code>Slave</code> 端重放 <code>binlog</code> 从而达到主从数据一致。（也可以使用cancal来重放bin log实现数据同步，备份。比如同步到ES，同步实时中间库）</p>
+<p>数据恢复 ：通过使用 <code>mysqlbinlog</code> 工具来恢复数据</p>
+<h5 id="bin-log-WAL实现"><a href="#bin-log-WAL实现" class="headerlink" title="bin log WAL实现"></a>bin log WAL实现</h5><p>对于 <code>InnoDB</code> 存储引擎而言，只有在事务提交时才会记录<code>biglog</code> ，此时记录还在内存中，那么 <code>biglog</code>是什么时候刷到磁盘中的呢？</p>
+<p><code>mysql</code> 通过 <code>sync_binlog</code> 参数控制 <code>biglog</code> 的刷盘时机，取值范围是 <code>0-N</code>：</p>
+<p>0：不去强制要求，由系统自行判断何时写入磁盘；</p>
+<p>1：每次 <code>commit</code> 的时候都要将 <code>binlog</code> 写入磁盘；</p>
+<p>N：每N个事务，才会将 <code>binlog</code> 写入磁盘。</p>
+<p>从上面可以看出， <code>sync_binlog</code> 最安全的是设置是 <code>1</code> ，这也是<code>MySQL 5.7.7</code>之后版本的默认值。但是设置一个大一些的值可以提升数据库性能，因此实际情况下也可以将值适当调大，牺牲一定的一致性来获取更好的性能。</p>
+<h5 id="bin-log-格式"><a href="#bin-log-格式" class="headerlink" title="bin log 格式"></a>bin log 格式</h5><p><code>binlog</code> 日志有三种格式，分别为 <code>STATMENT</code> 、 <code>ROW</code> 和 <code>MIXED</code></p>
+<ul>
+<li><p><code>STATMENT</code>：基于<code>SQL</code> 语句的复制( <code>statement-based replication, SBR</code> )，每一条会修改数据的sql语句会记录到<code>binlog</code> 中  。</p>
+</li>
+<li><ul>
+<li>优点：不需要记录每一行的变化，减少了 binlog 日志量，节约了  IO  , 从而提高了性能；</li>
+<li>缺点：在某些情况下会导致主从数据不一致，比如执行sysdate() 、  slepp()  等 。</li>
+</ul>
+</li>
+<li><p><code>ROW</code>：基于行的复制(<code>row-based replication, RBR</code> )，不记录每条sql语句的上下文信息，仅需记录哪条数据被修改了 。</p>
+</li>
+<li><ul>
+<li>优点：不会出现某些特定情况下的存储过程、或function、或trigger的调用和触发无法被正确复制的问题 ；</li>
+<li>缺点：会产生大量的日志，尤其是<code>alter table</code> 的时候会让日志暴涨</li>
+</ul>
+</li>
+<li><p><code>MIXED</code>：基于<code>STATMENT</code> 和 <code>ROW</code> 两种模式的混合复制(<code>mixed-based replication, MBR</code> )，一般的复制使用<code>STATEMENT</code> 模式保存 <code>binlog</code> ，对于 <code>STATEMENT</code> 模式无法复制的操作使用 <code>ROW</code> 模式保存 <code>binlog</code></p>
+</li>
+</ul>
+<p>在 <code>MySQL 5.7.7</code> 之前，默认的格式是 <code>STATEMENT</code> ， <code>MySQL 5.7.7</code> 之后，默认值是 <code>ROW</code>。日志格式通过 <code>binlog-format</code> 指定。</p>
+<p>启用binlog，通过配置 <code>/etc/my.cnf</code> 或 <code>/etc/mysql/mysql.conf.d/mysqld.cnf</code> 配置文件的 <code>log-bin</code> 选项</p>
+<h4 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h4><table>
+<thead>
+<tr>
+<th></th>
+<th>redo log</th>
+<th>bin log</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>存放内容</td>
+<td>物理日志，主要存放数据存放的物理信息，修改的数据页信息</td>
+<td>逻辑日志，简单理解就是记录执行的每一条sql。</td>
+</tr>
+<tr>
+<td>实现方式</td>
+<td>redo log是InnDB 实现的，是存储引擎层面的。不是所有的存储引擎都支持</td>
+<td>bin log 是Server层，所有MySQL都有，所有引擎都可以使用bin log</td>
+</tr>
+<tr>
+<td>记录模式</td>
+<td>循环写入的方式，从头写到尾，环的数据结构。通过LSN和checkpont实现。</td>
+<td>bin log是追加记录的方式，当给定固定大小文件时会不停追加，不会覆盖最开始的数据。</td>
+</tr>
+<tr>
+<td>适用场景</td>
+<td>数据库崩溃后的恢复，保存事务相关日志。（cash-safe）</td>
+<td>bin log 主从同步，数据恢复</td>
+</tr>
+<tr>
+<td>文件大小</td>
+<td>redo log 固定大小。</td>
+<td>bin log可以指定文件的大小,配置<code>max_binlog_size</code></td>
+</tr>
+</tbody></table>
+<p>由 <code>binlog</code> 和 <code>redo log</code> 的区别可知：<code>binlog</code> 日志只用于归档，只依靠 <code>binlog</code> 是没有 <code>crash-safe</code> 能力的。</p>
+<p>但只有 <code>redo log</code> 也不行，因为 <code>redo log</code> 是 <code>InnoDB</code>特有的，且日志上的记录落盘后会被覆盖掉。因此需要 <code>binlog</code>和 <code>redo log</code>二者同时记录，才能保证当数据库发生宕机重启时，数据不会丢失</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">Author: </span><span class="post-copyright-info"><a href="mailto:undefined">Hill</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">Link: </span><span class="post-copyright-info"><a href="http://yoursite.com/2020/10/16/MySQL%E4%B8%AD%E7%9A%84binlog%E3%80%81redolog/">http://yoursite.com/2020/10/16/MySQL%E4%B8%AD%E7%9A%84binlog%E3%80%81redolog/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">Copyright Notice: </span><span class="post-copyright-info">All articles in this blog are licensed under <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> unless stating additionally.</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/MySQL/">MySQL</a></div><div class="post_share"><div class="social-share" data-image="/img/00001.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="next-post pull-full"><a href="/2020/09/16/%E6%B5%85%E5%85%A5%E6%B5%85%E5%87%BARocketMQ/"><img class="next-cover" src="/img/00017.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">Next Post</div><div class="next_info">浅入浅出RocketMQ</div></div></a></div></nav></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="card-info-avatar is-center"><img class="avatar-img" src="/img/dog.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/><div class="author-info__name">Hill</div><div class="author-info__description">Stay Hungary Stay Foolish</div></div><div class="card-info-data"><div class="card-info-data-item is-center"><a href="/archives/"><div class="headline">Articles</div><div class="length-num">38</div></a></div><div class="card-info-data-item is-center"><a href="/tags/"><div class="headline">Tags</div><div class="length-num">22</div></a></div><div class="card-info-data-item is-center"><a href="/categories/"><div class="headline">Categories</div><div class="length-num">15</div></a></div></div><a class="button--animated" id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/ClaudeWilliam"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="https://github.com/ClaudeWilliam" target="_blank" title="github"><i class="GitHub"></i></a><a class="social-icon" href="https://twitter.com/qjqandjack" target="_blank" title="twitter"><i class="Twitter"></i></a></div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>Catalog</span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#WAL%E6%9C%BA%E5%88%B6"><span class="toc-number">2.</span> <span class="toc-text">WAL机制</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#mtr%EF%BC%88Mini-Transaction%EF%BC%89"><span class="toc-number">3.</span> <span class="toc-text">mtr（Mini-Transaction）</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#redo-log"><span class="toc-number">4.</span> <span class="toc-text">redo log</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#redo-log%E5%9F%BA%E6%9C%AC%E7%BB%93%E6%9E%84"><span class="toc-number">4.1.</span> <span class="toc-text">redo log基本结构</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#redo-log-WAL%E7%9A%84%E5%AE%9E%E7%8E%B0"><span class="toc-number">4.2.</span> <span class="toc-text">redo log WAL的实现</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#redo-log-%E6%A0%BC%E5%BC%8F"><span class="toc-number">4.3.</span> <span class="toc-text">redo log 格式</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#bin-log"><span class="toc-number">5.</span> <span class="toc-text">bin log</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#bin-log-WAL%E5%AE%9E%E7%8E%B0"><span class="toc-number">5.1.</span> <span class="toc-text">bin log WAL实现</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#bin-log-%E6%A0%BC%E5%BC%8F"><span class="toc-number">5.2.</span> <span class="toc-text">bin log 格式</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">6.</span> <span class="toc-text">总结</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>Recent Post</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2020/10/16/MySQL%E4%B8%AD%E7%9A%84binlog%E3%80%81redolog/" title="MySQL中的binlog、redolog"><img src="/img/00001.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="MySQL中的binlog、redolog"/></a><div class="content"><a class="title" href="/2020/10/16/MySQL%E4%B8%AD%E7%9A%84binlog%E3%80%81redolog/" title="MySQL中的binlog、redolog">MySQL中的binlog、redolog</a><time datetime="2020-10-16T02:21:08.000Z" title="Created 2020-10-16 10:21:08">2020-10-16</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2020/09/16/%E6%B5%85%E5%85%A5%E6%B5%85%E5%87%BARocketMQ/" title="浅入浅出RocketMQ"><img src="/img/00017.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="浅入浅出RocketMQ"/></a><div class="content"><a class="title" href="/2020/09/16/%E6%B5%85%E5%85%A5%E6%B5%85%E5%87%BARocketMQ/" title="浅入浅出RocketMQ">浅入浅出RocketMQ</a><time datetime="2020-09-16T01:21:08.000Z" title="Created 2020-09-16 09:21:08">2020-09-16</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2020/08/16/%E6%B5%85%E8%B0%88%E6%B3%9B%E5%9E%8B/" title="泛型"><img src="/img/00022.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="泛型"/></a><div class="content"><a class="title" href="/2020/08/16/%E6%B5%85%E8%B0%88%E6%B3%9B%E5%9E%8B/" title="泛型">泛型</a><time datetime="2020-08-16T01:21:08.000Z" title="Created 2020-08-16 09:21:08">2020-08-16</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2020/07/16/Java%E7%9A%84ClassLoader/" title="Java的ClassLoader"><img src="/img/back.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Java的ClassLoader"/></a><div class="content"><a class="title" href="/2020/07/16/Java%E7%9A%84ClassLoader/" title="Java的ClassLoader">Java的ClassLoader</a><time datetime="2020-07-16T01:21:08.000Z" title="Created 2020-07-16 09:21:08">2020-07-16</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2020/05/16/%E6%B5%85%E8%B0%88Redis%E5%BA%95%E5%B1%82-SkipList/" title="浅谈Redis底层-SkipList"><img src="/img/00021.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="浅谈Redis底层-SkipList"/></a><div class="content"><a class="title" href="/2020/05/16/%E6%B5%85%E8%B0%88Redis%E5%BA%95%E5%B1%82-SkipList/" title="浅谈Redis底层-SkipList">浅谈Redis底层-SkipList</a><time datetime="2020-05-16T01:21:08.000Z" title="Created 2020-05-16 09:21:08">2020-05-16</time></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2017 - 2021 By Hill</div><div class="framework-info"><span>Framework </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>Theme </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="Read Mode"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="Toggle Between Light And Dark Mode"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="Toggle between single-column and double-column"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="Setting"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="Table Of Contents"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="Back To Top"><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><div class="js-pjax"></div><canvas class="fireworks" mobile="false"></canvas><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/dist/fireworks.min.js"></script><script defer="defer" id="ribbon" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/dist/canvas-ribbon.min.js" size="150" alpha="0.6" zIndex="-1" mobile="false" data-click="false"></script><script defer="defer" id="fluttering_ribbon" mobile="true" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/dist/canvas-fluttering-ribbon.min.js"></script><script id="canvas_nest" defer="defer" color="0,0,255" opacity="0.7" zIndex="-1" count="99" mobile="false" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/dist/canvas-nest.min.js"></script><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/dist/activate-power-mode.min.js"></script><script>POWERMODE.colorful = true;
+POWERMODE.shake = true;
+POWERMODE.mobile = false;
+document.body.addEventListener('input', POWERMODE);
+</script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
