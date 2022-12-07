@@ -1,0 +1,221 @@
+<!DOCTYPE html><html lang="zh-Hans" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>事务 | Hill's Notes</title><meta name="keywords" content="编程,mysql"><meta name="author" content="Hill"><meta name="copyright" content="Hill"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="(Transaction)事务:访问并可能更新数据库中各种数据项的一个程序执行单元(unit)。也可以说一系列的操作，不允许加塞。Transaction是交易的意思，unit是单元也有单位的意思，也可以说是一种访问时交易的单位。 事务的特性：事务是恢复和并发的基本单位。即每次出问题回滚一个事务(Transaction)。在并发的情况下，也就是并发多个事务,也就是同时处理多个事务，事务之间是并发。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="事务">
+<meta property="og:url" content="https://blog.51cloud.win/2017/06/17/%E4%BA%8B%E5%8A%A1/index.html">
+<meta property="og:site_name" content="Hill&#39;s Notes">
+<meta property="og:description" content="(Transaction)事务:访问并可能更新数据库中各种数据项的一个程序执行单元(unit)。也可以说一系列的操作，不允许加塞。Transaction是交易的意思，unit是单元也有单位的意思，也可以说是一种访问时交易的单位。 事务的特性：事务是恢复和并发的基本单位。即每次出问题回滚一个事务(Transaction)。在并发的情况下，也就是并发多个事务,也就是同时处理多个事务，事务之间是并发。">
+<meta property="og:locale">
+<meta property="og:image" content="https://blog.51cloud.win/img/00012.jpg">
+<meta property="article:published_time" content="2017-06-17T02:00:00.000Z">
+<meta property="article:modified_time" content="2021-04-17T06:07:21.538Z">
+<meta property="article:author" content="Hill">
+<meta property="article:tag" content="编程">
+<meta property="article:tag" content="mysql">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://blog.51cloud.win/img/00012.jpg"><link rel="shortcut icon" href="/img/flag.jpg"><link rel="canonical" href="https://blog.51cloud.win/2017/06/17/%E4%BA%8B%E5%8A%A1/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: 'Copy successfully',
+    error: 'Copy error',
+    noSupport: 'The browser does not support'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  date_suffix: {
+    just: 'Just',
+    min: 'minutes ago',
+    hour: 'hours ago',
+    day: 'days ago',
+    month: 'months ago'
+  },
+  copyright: {"limitCount":50,"languages":{"author":"Author: Hill","link":"Link: ","source":"Source: Hill's Notes","info":"Copyright is owned by the author. For commercial reprints, please contact the author for authorization. For non-commercial reprints, please indicate the source."}},
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    jQuery: 'https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js',
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+    },
+    fancybox: {
+      js: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isanchor: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = { 
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: false,
+  postUpdate: '2021-04-17 14:07:21'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    })(window)</script><meta name="generator" content="Hexo 5.4.0"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="author-avatar"><img class="avatar-img" src="/img/dog.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data"><div class="data-item is-center"><div class="data-item-link"><a href="/archives/"><div class="headline">Articles</div><div class="length-num">45</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/tags/"><div class="headline">Tags</div><div class="length-num">25</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/categories/"><div class="headline">Categories</div><div class="length-num">15</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fa fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fa fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('/img/00012.jpg')"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">Hill's Notes</a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fa fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fa fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">事务</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">Created</span><time class="post-meta-date-created" datetime="2017-06-17T02:00:00.000Z" title="Created 2017-06-17 10:00:00">2017-06-17</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">Updated</span><time class="post-meta-date-updated" datetime="2021-04-17T06:07:21.538Z" title="Updated 2021-04-17 14:07:21">2021-04-17</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/">数据库</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="事务"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">Post View:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><p>(Transaction)事务:访问并可能更新数据库中各种数据项的一个程序执行单元(unit)。也可以说一系列的操作，不允许加塞。Transaction是交易的意思，unit是单元也有单位的意思，也可以说是一种访问时交易的单位。</p>
+<p>事务的特性：事务是恢复和并发的基本单位。即每次出问题回滚一个事务(Transaction)。在并发的情况下，也就是并发多个事务,也就是同时处理多个事务，事务之间是并发。</p>
+<p>事务具有的四个属性：原子性  atomicity，一致性  consistency，隔离性  isolation，永久性 durability。</p>
+<p>原子性：一个事务是一个不可分割的工作单位，事务中包括的诸操作要么都做，要么都不做。也就是原子不可分割，但单内部执行，还是一条一条指令去执行。</p>
+<p>一致性：事务必须是使数据库从一个一致性状态变到另一个一致性状态。一致性与原子性是密切相关的。在关系型数据库中都是强一致性，非关系数据库中弱一致性也就是最终一致性是可以接受的。</p>
+<ul>
+<li>强一致性：当更新操作完成之后，任何多个后续进程或者线程的访问都会返回最新的更新过的值(可能是多个数据库节点，也有可能是单机)。这种是对用户最友好的，就是用户上一次写什么，下一次就保证能读到什么。根据 CAP 理论，这种实现需要牺牲可用性。</li>
+<li>弱一致性：系统并不保证续进程或者线程的访问都会返回最新的更新过的值。系统在数据写入成功之后，不承诺立即可以读到最新写入的值，也不会具体的承诺多久之后可以读到。</li>
+<li>最终一致性：弱一致性的特定形式。系统保证在没有后续更新的前提下，系统<strong>最终</strong>返回上一次更新操作的值。在没有故障发生的前提下，不一致窗口的时间主要受通信延迟，系统负载和复制副本的个数影响。DNS 是一个典型的最终一致性系统(由于DNS多级缓存的实现，所以修改DNS记录后不会在全球所有DNS服务节点生效，需要等待DNS服务器缓存过期后向源服务器更新新的记录才能实现)。也可说最终一致性，就是不保证在任意时刻任意节点上的同一份数据都是相同的，但是随着时间的迁移，不同节点上的同一份数据总是在向趋同的方向变化。也可以简单的理解为在一段时间后，节点间的数据会最终达到一致状态。</li>
+</ul>
+<p>隔离性：一个事务的执行不能被其他事务干扰。即一个事务内部的操作及使用的数据对并发的其他事务是隔离的，并发执行的各个事务之间不能互相干扰。SQL标准定义了4类隔离级别，包括了一些具体规则，用来限定事务内外的哪些改变是可见的，哪些是不可见的。低级别的隔离级一般支持更高的并发处理，并拥有更低的系统开销。</p>
+<ul>
+<li><p>Read Uncommitted（读取未提交内容）在该隔离级别，所有事务都可以看到其他未提交事务的执行结果。本隔离级别很少用于实际应用，因为它的性能也不比其他级别好多少。<strong>读取未提交的数据，也被称之为脏读（Dirty Read）</strong>，这个一般只多个事务之间存在的问题。</p>
+</li>
+<li><p>Read Committed（读取提交内容）这是大多数数据库系统的默认隔离级别（但不是MySQL默认的）。它满足了隔离的简单定义：一个事务只能看见已经提交事务所做的改变。这种隔离级别也支持所谓的不可重复读（Nonrepeatable Read），因为同一事务的其他实例在该实例处理其间可能会有新的commit，所以同一select可能返回不同结果。</p>
+</li>
+<li><p>Repeatable Read（可重读，即一个事务中可以重复读取数据）这是MySQL的默认事务隔离级别，它确保同一事务的多个实例在并发读取数据时，会看到同样的数据行。不过理论上，这会导致另一个棘手的问题：<strong>幻读（Phantom Read）。简单的说，幻读指当用户读取某一范围的数据行时，另一个事务又在该范围内插入了新行，当用户再读取该范围的数据行时，会发现有新的“幻影”行。</strong>InnoDB和Falcon存储引擎通过多版本并发控制（MVCC，Multiversion Concurrency Control）机制解决了该问题。    </p>
+</li>
+<li><p>Serializable（可串行化） 这是最高的隔离级别，它通过<strong>强制事务排序</strong>，使之不可能相互冲突，从而解决幻读问题。简言之，它是在每个读的数据行上加上共享锁。在这个级别，可能导致大量的超时现象和锁竞争。(不存在事务的并发)</p>
+</li>
+<li><p>脏读(Drity Read)：<strong>某个事务</strong>已更新一份数据，<strong>另一个事务</strong>在此时读取了同一份数据，由于某些原因，前一个RollBack了操作，则后一个事务所读取的数据就会是不正确的。</p>
+</li>
+<li><p>不可重复读(Non-repeatable read):在<strong>一个事务</strong>的两次查询之中数据不一致，这可能是两次查询过程中间插入了一个事务更新的原有的数据。<strong>即一次事务中不可已重复读取数据</strong></p>
+</li>
+<li><p>幻读(Phantom Read):在<strong>一个事务</strong>的两次查询中数据笔数不一致，例如有一个事务查询了几列(Row)数据，而<strong>另一个事务</strong>却在此时插入了新的几列数据，先前的事务在接下来的查询中，就会发现有几列数据是它先前所没有的。</p>
+<p><img src="/img/af5b9c1e-4517-3df2-ad62-af25d1672d12.jpg" alt="img"></p>
+</li>
+</ul>
+<p>持久性：持久性也称永久性，指一个事务一旦提交，它对数据库中数据的改变就应该是永久性的。接下来的其他操作或故障不应该对其有任何影响，除非下一个事务中的操作更改这个数据。</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">Author: </span><span class="post-copyright-info"><a href="mailto:undefined">Hill</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">Link: </span><span class="post-copyright-info"><a href="https://blog.51cloud.win/2017/06/17/%E4%BA%8B%E5%8A%A1/">https://blog.51cloud.win/2017/06/17/%E4%BA%8B%E5%8A%A1/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">Copyright Notice: </span><span class="post-copyright-info">All articles in this blog are licensed under <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> unless stating additionally.</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E7%BC%96%E7%A8%8B/">编程</a><a class="post-meta__tags" href="/tags/mysql/">mysql</a></div><div class="post_share"><div class="social-share" data-image="/img/00012.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2017/07/27/Java%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B/"><img class="prev-cover" src="/img/00005.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">Previous Post</div><div class="prev_info">Java内存模型</div></div></a></div><div class="next-post pull-right"><a href="/2017/05/29/%E9%94%81/"><img class="next-cover" src="/img/00012.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">Next Post</div><div class="next_info">CAS-乐观锁</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span> Related Articles</span></div><div class="relatedPosts-list"><div><a href="/2017/10/25/ArrayQueue/" title="ArrayBlockingQueue"><img class="cover" src="/img/00002.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2017-10-25</div><div class="title">ArrayBlockingQueue</div></div></a></div><div><a href="/2017/05/14/HashMap/" title="HashMap"><img class="cover" src="/img/00004.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2017-05-14</div><div class="title">HashMap</div></div></a></div><div><a href="/2017/07/27/Java内存模型/" title="Java内存模型"><img class="cover" src="/img/00005.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2017-07-27</div><div class="title">Java内存模型</div></div></a></div><div><a href="/2022/11/20/Java的性能测试工具JMH/" title="Java热点代码的性能测试工具JMH"><img class="cover" src="/img/00036.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-11-20</div><div class="title">Java热点代码的性能测试工具JMH</div></div></a></div><div><a href="/2017/05/14/Java语法糖/" title="Java语法糖"><img class="cover" src="/img/00007.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2017-05-14</div><div class="title">Java语法糖</div></div></a></div><div><a href="/2017/09/17/LinkedHashMap/" title="LinkedHashMap"><img class="cover" src="/img/00008.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2017-09-17</div><div class="title">LinkedHashMap</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="card-info-avatar is-center"><img class="avatar-img" src="/img/dog.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/><div class="author-info__name">Hill</div><div class="author-info__description">Stay Hungry Stay Foolish</div></div><div class="card-info-data"><div class="card-info-data-item is-center"><a href="/archives/"><div class="headline">Articles</div><div class="length-num">45</div></a></div><div class="card-info-data-item is-center"><a href="/tags/"><div class="headline">Tags</div><div class="length-num">25</div></a></div><div class="card-info-data-item is-center"><a href="/categories/"><div class="headline">Categories</div><div class="length-num">15</div></a></div></div><a class="button--animated" id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/ClaudeWilliam"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="https://github.com/ClaudeWilliam" target="_blank" title="github"><i class="GitHub"></i></a><a class="social-icon" href="https://twitter.com/qjqandjack" target="_blank" title="twitter"><i class="Twitter"></i></a></div></div><div class="sticky_layout"><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>Recent Post</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2022/11/20/Java%E7%9A%84%E6%80%A7%E8%83%BD%E6%B5%8B%E8%AF%95%E5%B7%A5%E5%85%B7JMH/" title="Java热点代码的性能测试工具JMH"><img src="/img/00036.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Java热点代码的性能测试工具JMH"/></a><div class="content"><a class="title" href="/2022/11/20/Java%E7%9A%84%E6%80%A7%E8%83%BD%E6%B5%8B%E8%AF%95%E5%B7%A5%E5%85%B7JMH/" title="Java热点代码的性能测试工具JMH">Java热点代码的性能测试工具JMH</a><time datetime="2022-11-20T12:03:14.000Z" title="Created 2022-11-20 20:03:14">2022-11-20</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/10/10/MySQL%E4%B8%AD%E7%9A%84%E6%AD%BB%E9%94%81/" title="MySQL的死锁"><img src="/img/00035.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="MySQL的死锁"/></a><div class="content"><a class="title" href="/2022/10/10/MySQL%E4%B8%AD%E7%9A%84%E6%AD%BB%E9%94%81/" title="MySQL的死锁">MySQL的死锁</a><time datetime="2022-10-10T12:03:14.000Z" title="Created 2022-10-10 20:03:14">2022-10-10</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/06/20/Reactor%E6%A8%A1%E5%BC%8F%E4%B8%8EEventLoop/" title="Reactor模式与EventLoop"><img src="/img/00034.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Reactor模式与EventLoop"/></a><div class="content"><a class="title" href="/2022/06/20/Reactor%E6%A8%A1%E5%BC%8F%E4%B8%8EEventLoop/" title="Reactor模式与EventLoop">Reactor模式与EventLoop</a><time datetime="2022-06-20T12:03:14.000Z" title="Created 2022-06-20 20:03:14">2022-06-20</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/02/10/MySQL%E4%B8%AD%E7%9A%84%E9%94%81%E5%92%8CMVCC/" title="MySQL中的锁与MVCC"><img src="/img/00033.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="MySQL中的锁与MVCC"/></a><div class="content"><a class="title" href="/2022/02/10/MySQL%E4%B8%AD%E7%9A%84%E9%94%81%E5%92%8CMVCC/" title="MySQL中的锁与MVCC">MySQL中的锁与MVCC</a><time datetime="2022-02-10T12:03:14.000Z" title="Created 2022-02-10 20:03:14">2022-02-10</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/10/10/SpringBoot%E5%90%AF%E5%8A%A8%E7%9A%84%E8%BF%87%E7%A8%8B%E5%88%86%E6%9E%90/" title="SpringBoot启动的过程分析"><img src="/img/00032.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="SpringBoot启动的过程分析"/></a><div class="content"><a class="title" href="/2021/10/10/SpringBoot%E5%90%AF%E5%8A%A8%E7%9A%84%E8%BF%87%E7%A8%8B%E5%88%86%E6%9E%90/" title="SpringBoot启动的过程分析">SpringBoot启动的过程分析</a><time datetime="2021-10-10T12:03:14.000Z" title="Created 2021-10-10 20:03:14">2021-10-10</time></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2017 - 2022 By Hill</div><div class="framework-info"><span>Framework </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>Theme </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="Read Mode"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="Toggle Between Light And Dark Mode"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="Toggle between single-column and double-column"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="Setting"><i class="fas fa-cog fa-spin"></i></button><button id="go-up" type="button" title="Back To Top"><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><div class="js-pjax"><script>if (!window.MathJax) {
+  window.MathJax = {
+    loader: {
+      source: {
+        '[tex]/amsCd': '[tex]/amscd'
+      }
+    },
+    tex: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"]],
+      tags: 'ams'
+    },
+    options: {
+      renderActions: {
+        findScript: [10, doc => {
+          for (const node of document.querySelectorAll('script[type^="math/tex"]')) {
+            const display = !!node.type.match(/; *mode=display/)
+            const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display)
+            const text = document.createTextNode('')
+            node.parentNode.replaceChild(text, node)
+            math.start = {node: text, delim: '', n: 0}
+            math.end = {node: text, delim: '', n: 0}
+            doc.math.push(math)
+          }
+        }, ''],
+        addClass: [200,() => {
+          document.querySelectorAll('mjx-container:not([display=\'true\']').forEach( node => {
+            const target = node.parentNode
+            if (!target.classList.contains('has-jax')) {
+              target.classList.add('mathjax-overflow')
+            }
+          })
+        }, '', false]
+      }
+    }
+  }
+  
+  const script = document.createElement('script')
+  script.src = 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js'
+  script.id = 'MathJax-script'
+  script.async = true
+  document.head.appendChild(script)
+} else {
+  MathJax.startup.document.state(0)
+  MathJax.texReset()
+  MathJax.typeset()
+}</script></div><canvas class="fireworks" mobile="false"></canvas><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/dist/fireworks.min.js"></script><script defer="defer" id="ribbon" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/dist/canvas-ribbon.min.js" size="150" alpha="0.6" zIndex="-1" mobile="false" data-click="false"></script><script defer="defer" id="fluttering_ribbon" mobile="true" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/dist/canvas-fluttering-ribbon.min.js"></script><script id="canvas_nest" defer="defer" color="0,0,255" opacity="0.7" zIndex="-1" count="99" mobile="false" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/dist/canvas-nest.min.js"></script><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/dist/activate-power-mode.min.js"></script><script>POWERMODE.colorful = true;
+POWERMODE.shake = true;
+POWERMODE.mobile = false;
+document.body.addEventListener('input', POWERMODE);
+</script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

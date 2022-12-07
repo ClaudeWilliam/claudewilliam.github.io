@@ -1,0 +1,403 @@
+<!DOCTYPE html><html lang="zh-Hans" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>MySQL的死锁 | Hill's Notes</title><meta name="keywords" content="MySql,数据库"><meta name="author" content="Hill"><meta name="copyright" content="Hill"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="前言 I have a pen I have an apple Ugh Apple pen  这首PPAP大多数人都应该听过，不过今天不是讨论唱歌而是一个和PPAP差不多的事情 I have a MySQL I have DeadLock Ugh MySQL-DeadLock。 MySQL的死锁。 什么是死锁死锁(DeadLock):当两个以上的运算单元，双方都在等待对方停止执行，以获取系统资源，">
+<meta property="og:type" content="article">
+<meta property="og:title" content="MySQL的死锁">
+<meta property="og:url" content="https://blog.51cloud.win/2022/10/10/MySQL%E4%B8%AD%E7%9A%84%E6%AD%BB%E9%94%81/index.html">
+<meta property="og:site_name" content="Hill&#39;s Notes">
+<meta property="og:description" content="前言 I have a pen I have an apple Ugh Apple pen  这首PPAP大多数人都应该听过，不过今天不是讨论唱歌而是一个和PPAP差不多的事情 I have a MySQL I have DeadLock Ugh MySQL-DeadLock。 MySQL的死锁。 什么是死锁死锁(DeadLock):当两个以上的运算单元，双方都在等待对方停止执行，以获取系统资源，">
+<meta property="og:locale">
+<meta property="og:image" content="https://blog.51cloud.win/img/00035.jpg">
+<meta property="article:published_time" content="2022-10-10T12:03:14.000Z">
+<meta property="article:modified_time" content="2022-11-06T04:11:43.593Z">
+<meta property="article:author" content="Hill">
+<meta property="article:tag" content="MySql">
+<meta property="article:tag" content="数据库">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://blog.51cloud.win/img/00035.jpg"><link rel="shortcut icon" href="/img/flag.jpg"><link rel="canonical" href="https://blog.51cloud.win/2022/10/10/MySQL%E4%B8%AD%E7%9A%84%E6%AD%BB%E9%94%81/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: 'Copy successfully',
+    error: 'Copy error',
+    noSupport: 'The browser does not support'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  date_suffix: {
+    just: 'Just',
+    min: 'minutes ago',
+    hour: 'hours ago',
+    day: 'days ago',
+    month: 'months ago'
+  },
+  copyright: {"limitCount":50,"languages":{"author":"Author: Hill","link":"Link: ","source":"Source: Hill's Notes","info":"Copyright is owned by the author. For commercial reprints, please contact the author for authorization. For non-commercial reprints, please indicate the source."}},
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    jQuery: 'https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js',
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+    },
+    fancybox: {
+      js: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isanchor: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = { 
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2022-11-06 12:11:43'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    })(window)</script><meta name="generator" content="Hexo 5.4.0"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="author-avatar"><img class="avatar-img" src="/img/dog.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data"><div class="data-item is-center"><div class="data-item-link"><a href="/archives/"><div class="headline">Articles</div><div class="length-num">45</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/tags/"><div class="headline">Tags</div><div class="length-num">25</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/categories/"><div class="headline">Categories</div><div class="length-num">15</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fa fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fa fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('/img/00035.jpg')"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">Hill's Notes</a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fa fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fa fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">MySQL的死锁</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">Created</span><time class="post-meta-date-created" datetime="2022-10-10T12:03:14.000Z" title="Created 2022-10-10 20:03:14">2022-10-10</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">Updated</span><time class="post-meta-date-updated" datetime="2022-11-06T04:11:43.593Z" title="Updated 2022-11-06 12:11:43">2022-11-06</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/">数据库</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="MySQL的死锁"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">Post View:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p><code> I have a pen I have an apple Ugh Apple pen</code>  这首PPAP大多数人都应该听过，不过今天不是讨论唱歌而是一个和PPAP差不多的事情 <code>I have a MySQL I have DeadLock Ugh MySQL-DeadLock</code>。 MySQL的死锁。</p>
+<h3 id="什么是死锁"><a href="#什么是死锁" class="headerlink" title="什么是死锁"></a>什么是死锁</h3><p>死锁(DeadLock):当两个以上的运算单元，双方都在等待对方停止执行，以获取系统资源，但是没有一方提前退出时，就称为死锁。一般出现死锁会满足以下四种情况：</p>
+<ul>
+<li>互斥条件：一个资源每次只能被一个运算单元使用。</li>
+<li>持有和等待：一个运算单元可以在等待时持有系统资源，保持不释放。</li>
+<li>禁止抢占：运算单元持有资源，在使用完之前不可以被强行退出。</li>
+<li>循环等待：一系列运算单元互相持有其他运算单元所需要的资源。</li>
+</ul>
+<p>只要破坏以上四个条件中的任意一个就可以解决这个死锁问题，这也是后面解决死锁问题的基本思路。</p>
+<p>在操作系统里资源持有的维度是进程，所以上述运算单元可以理解为一个进程（这种死锁一般是指操作系统维度的进程管理）。根本原因还是因为并发和资源的分配的问题。</p>
+<h3 id="MySQL加锁的过程"><a href="#MySQL加锁的过程" class="headerlink" title="MySQL加锁的过程"></a>MySQL加锁的过程</h3><p>之前文章有讨论MySQL的锁和一些基本加锁规则<a href="https://blog.51cloud.win/2022/02/10/MySQL%E4%B8%AD%E7%9A%84%E9%94%81%E5%92%8CMVCC/">MySQL中的锁和MVCC</a>。这里只重复一个规则，MySQL是两段加锁，加锁和解锁是分开的，加锁的时候只加锁，不释放锁，释放锁的时候是在执行完之后把所有的锁都释放掉（不过是在同一个事务里）。在这个两段加锁的逻辑里我们就看到<strong>禁止抢占</strong>，<strong>持有和等待</strong>两个条件，也就是加锁的资源要等执行完了才会释放。</p>
+<table>
+<thead>
+<tr>
+<th>事务</th>
+<th>加锁与释放锁</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>begin</td>
+<td></td>
+</tr>
+<tr>
+<td>insert into …</td>
+<td>加锁（行锁，间隙锁）</td>
+</tr>
+<tr>
+<td>update …..</td>
+<td>加锁（行锁，间隙锁）</td>
+</tr>
+<tr>
+<td>commit</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>释放 insert into的锁，释放update的锁</td>
+</tr>
+</tbody></table>
+<p>MySQL由于使用了MVCC的模式，所以一般在读取的收都不会加锁，使用的是快照读，只有在update，delete，insert的时候才会进行当前读的情况才会出现死锁。关于当前读和快照读我在上个关于MySQL的文章中也有说。不过除了这些MySQL也提供update、insert 的扩展比如<code>insert into from select</code>、<code>select for update</code>、<code>insert for update</code>这种语句在索引使用不正确的情况下也会出现死锁。</p>
+<h4 id="InnoDB引擎是如何加锁的"><a href="#InnoDB引擎是如何加锁的" class="headerlink" title="InnoDB引擎是如何加锁的"></a>InnoDB引擎是如何加锁的</h4><p>关于InnoDB是如何加锁过程，是一个很复杂事情，而且也需要具体情况具体分析。你在分析一条SQL加锁的过程一般，都要提前了解一些关于你使用MySQL的隔离级别，你使用MySQL版本，你的表里面里的索引结构，比如是主键索引、二级索引、唯一索引、MySQL的执行计划（会不会出现索引合并）很多因素。比如下面这两条语句的分析</p>
+<h5 id="主键索引-隔离级别RC"><a href="#主键索引-隔离级别RC" class="headerlink" title="主键索引+隔离级别RC"></a>主键索引+隔离级别RC</h5><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">----id是主键索引 隔离级别是RC</span></span><br><span class="line"><span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> student  <span class="keyword">where</span> id <span class="operator">=</span> <span class="number">10</span>; <span class="comment">---SQL1</span></span><br><span class="line"><span class="keyword">delete</span> <span class="keyword">from</span> student <span class="keyword">where</span> id <span class="operator">=</span> <span class="number">12</span>;   <span class="comment">---SQL2</span></span><br></pre></td></tr></table></figure>
+
+<p>SQL1：不加锁，因为有MVCC的存在，读不加锁。</p>
+<p>SQL2：对id = 12 的主键索引加X锁，主键索引加锁。</p>
+<p>加锁过程：id是主键索引，直接锁定主键索引。（锁是加在索引上的）</p>
+<p><img src="https://raw.githubusercontent.com/ClaudeWilliam/pic-blog/master/imgdeadlock1.png"></p>
+<h5 id="唯一索引-隔离级别RC"><a href="#唯一索引-隔离级别RC" class="headerlink" title="唯一索引+隔离级别RC"></a>唯一索引+隔离级别RC</h5><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">---- name是唯一索引 隔离级别是RC  id是主键索引  id =15 nick_name = &#x27;xiaoming&#x27;</span></span><br><span class="line">update student <span class="keyword">set</span> age <span class="operator">=</span> <span class="number">12</span> <span class="keyword">where</span> nick_name <span class="operator">=</span> <span class="string">&#x27;xiaoming&#x27;</span> <span class="comment">----SQL3</span></span><br></pre></td></tr></table></figure>
+
+<p>SQL3：加两个锁，即name的唯一索引的X锁和id=15的主键锁。</p>
+<p>加锁过程：nick_name是唯一索引，id是主键。我们知道MySQL是聚簇索引，所以数据都存在主键索引内容里。在查询过程种需要回表。所以当加锁的时候也是遵循这个流程。首先找到nick_name= xiaoming的索引项，然后加X锁。同时回表查询数据获取到id=15的数据。然后在对主键id=15的索引项加锁。</p>
+<p>为什么加两个锁，一个锁不够用吗？</p>
+<p>如果只在唯一索引项加锁，没有主键索引加锁，那么后续操作如果根据主键索引去删除，会导致锁失效。并发的update感受不到delete的存在，导致更新失败。在这个栗子，可以分析加锁过程是从二级索引到主键索引都要加锁。加锁过程是先从二级索引加锁，然后在加一级索引</p>
+<p><img src="https://raw.githubusercontent.com/ClaudeWilliam/pic-blog/master/imgdeadlock2.png"></p>
+<h5 id="非唯一索引-隔离级别RC"><a href="#非唯一索引-隔离级别RC" class="headerlink" title="非唯一索引+隔离级别RC"></a>非唯一索引+隔离级别RC</h5><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-----real_name是非唯一索引 隔离级别是RC id是主键索引 id=11 和 id =18 real_name = &#x27;xiaohong&#x27; </span></span><br><span class="line">update student <span class="keyword">set</span> age <span class="operator">=</span><span class="number">15</span> <span class="keyword">where</span> real_name <span class="operator">=</span> <span class="string">&#x27;xiaohong&#x27;</span> <span class="comment">----SQL4</span></span><br></pre></td></tr></table></figure>
+
+<p>SQL4：加两个锁，在二级索引real_name= ‘xiaohong’加X锁，同时把id=11和id=18的主键索引加X锁。</p>
+<p>加锁过程：首先查询real_name=’xiaohong’，然后把符合过滤数据加X锁，然后回表查询主键索引，在对主键索引id=11和id=18加X锁。</p>
+<p><img src="https://raw.githubusercontent.com/ClaudeWilliam/pic-blog/master/imgdeadlock4.png"></p>
+<h5 id="非索引-隔离级别RC"><a href="#非索引-隔离级别RC" class="headerlink" title="非索引+隔离级别RC"></a>非索引+隔离级别RC</h5><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">---- address 不是索引，隔离级别是RC id = 22 和 id = 24</span></span><br><span class="line">update student <span class="keyword">set</span> age <span class="operator">=</span><span class="number">22</span> <span class="keyword">where</span> address <span class="operator">=</span> <span class="string">&#x27;beijing&#x27;</span> <span class="comment">----SQL5</span></span><br></pre></td></tr></table></figure>
+
+<p>SQL5：加一个锁（主键索引的锁），首先在存储引擎层面把每条数据都加锁（全表扫描），把对应主键Id数据全部加X锁。但是在MySQL-Server层会进行优化，把不符合锁的数据锁释放掉。（违背了2PL原则），不过这种方式提高效率，但是存储引擎层面的所有数据加锁不会省略。</p>
+<p>加锁过程：由于address字段没有索引存储引擎会全表扫描，把所有数据都加上X锁（逻辑上是表锁），也就是所有的主键id都加上X锁。MySQL-Server在过滤条件时候会调用unlock_row方法，把不满足数据都得锁都释放掉，在Server层保证满足记录上锁，提高了效率。不过这种方法违背了两端加锁原则。加锁顺序address数据上的X锁，主键索引的X锁。</p>
+<p><img src="https://raw.githubusercontent.com/ClaudeWilliam/pic-blog/master/imgdeadlock6.png"></p>
+<h5 id="主键索引-隔离级别RR"><a href="#主键索引-隔离级别RR" class="headerlink" title="主键索引+隔离级别RR"></a>主键索引+隔离级别RR</h5><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">---- id 是主键索引 隔离级别是RR</span></span><br><span class="line">update student <span class="keyword">set</span> real_name <span class="operator">=</span><span class="string">&#x27;zhidi&#x27;</span> <span class="keyword">where</span> id <span class="operator">=</span> <span class="number">12</span>;   <span class="comment">---SQL6</span></span><br></pre></td></tr></table></figure>
+
+<p>SQL6：对id = 12 的主键索引加X锁，主键索引加锁。</p>
+<p>加锁过程：id是主键索引，直接锁定主键索引。（其实加的是Next-Key锁只不过退化（升级）成X锁）</p>
+<p><img src="https://raw.githubusercontent.com/ClaudeWilliam/pic-blog/master/imgdeadlock8.png"></p>
+<h5 id="唯一索引-隔离级别RR"><a href="#唯一索引-隔离级别RR" class="headerlink" title="唯一索引+隔离级别RR"></a>唯一索引+隔离级别RR</h5><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">---- nick_name 是唯一索引 隔离级别是RR id是主键索引 id =19 </span></span><br><span class="line">update student <span class="keyword">set</span> age <span class="operator">=</span> <span class="number">18</span> <span class="keyword">where</span> nick_name <span class="operator">=</span> <span class="string">&#x27;wangba&#x27;</span>;   <span class="comment">---SQL7</span></span><br></pre></td></tr></table></figure>
+
+<p>SQL7：加两个锁，在唯一索引nick_name= ‘wangba’加X锁，同时id=19的主键索引加X锁。</p>
+<p>加锁过程：首先查询nick_name=’wangba’，然后把符合过滤数据加X锁，然后回表查询主键索引，在对主键索引id=11加X锁。准确点描述这种模式也加了GAP锁，只不过是等值查找退化成了X锁。（其实加的是Next-Key锁只不过退化（升级）成X锁）</p>
+<p><img src="https://raw.githubusercontent.com/ClaudeWilliam/pic-blog/master/imgdeadlock9.png"></p>
+<h5 id="非唯一索引-隔离级别RR"><a href="#非唯一索引-隔离级别RR" class="headerlink" title="非唯一索引+隔离级别RR"></a>非唯一索引+隔离级别RR</h5><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">---- real_name 是非唯一索引 隔离级别是RC id是主键索引 id = 22 和 id = 12  real_name = &#x27;zhaolan&#x27;</span></span><br><span class="line">update student <span class="keyword">set</span> age <span class="operator">=</span> <span class="number">20</span> <span class="keyword">where</span> real_name <span class="operator">=</span> <span class="string">&#x27;zhaolan&#x27;</span>; <span class="comment">----SQL8</span></span><br></pre></td></tr></table></figure>
+
+<p>SQL8：加三个锁，real_name索引上索引的数据加X锁，在real_name=’xiaolan’的数据附近加GAP锁，最后在主键id=12 和 id = 22 加X锁。</p>
+<p>加锁过程：在real_name索引加X锁，由于隔离级别是RR保证不幻读，在rea_name=’xiaolan’数据附近加3个GPA锁，最后在主键id =12 和id =22 的数据上加X锁，保证数据不会被更新。</p>
+<p>为啥加GAP锁可以解决幻读问题</p>
+<p>GPA锁是间隙锁，间隙锁保证两条数据中间不可以插入数据。幻读指同一个事务两次查询获取到的记录和记录数量相同，不会出现数据修改，X锁保证，数量一致，GPA锁保证，即重复读取数据一致，这里的读指的是当前读。因为B+树是一个由顺序的树，相近的数据都是有顺序且连续分布，当新的数据插入会发现GAP锁（间隙锁），不会使新的数据不会被插入。保证了两次当读取数据数量使一致的。加GAP锁使从第一条满足条件开始加，一直加到第一条不满足条的数据对于real_name的索引。</p>
+<p>为啥SQL7不需要加GAP锁而SQL8 需要加GAP锁。</p>
+<p>因为GAP（间隙锁）保证使两次读取的数量一致，而SQL7种nick_name索引字段使唯一索引，只能产生一条数据，不会存在数据数量不一致的问题（永远都只有一条），X锁保证数据读取时候不会被删除。所以也就不需要使用GAP锁去保证间隙插入数据。唯一索引解决了这个问题。(这里只是讨论等值，如果是范围update也会不一样，范围会扩大)</p>
+<p><img src="https://raw.githubusercontent.com/ClaudeWilliam/pic-blog/master/imgdeadlock10.png"></p>
+<h5 id="非索引-隔离级别RR"><a href="#非索引-隔离级别RR" class="headerlink" title="非索引+隔离级别RR"></a>非索引+隔离级别RR</h5><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">---- address 是没有索引  id 是主键索引  隔离级别RR</span></span><br><span class="line">update student <span class="keyword">set</span> age <span class="operator">=</span> <span class="number">22</span> <span class="keyword">where</span> address <span class="operator">=</span> <span class="string">&#x27;shanghai&#x27;</span>; <span class="comment">----SQL9</span></span><br></pre></td></tr></table></figure>
+
+<p>SQL9：主键索引所有数据都会被加X锁和GAP锁。在使用（semi-consistent read） 半一致性读的熟，会提前释放X锁和GAP锁。</p>
+<p>加锁过程：由于全表扫描，会把主键索引（聚簇索引）全部加X锁，由于RR隔离级别，防止插入数据，在所有数据都会加上GAP锁，这个加锁时间超级长。而且会导致整个表都被锁死。除非开放semi-consistent read，会把不满足查询条件的数据锁过滤掉。提前释放掉，类似RC种的处理。不过打开semi-consistent read也会导致其他问题，如果不是很适合不推荐使用。</p>
+<p>加锁顺序address所有数据的X锁，GAP锁主键索引的X锁</p>
+<p><img src="https://raw.githubusercontent.com/ClaudeWilliam/pic-blog/master/imgdeadlock11.png"></p>
+<h5 id="非索引-隔离级别Serializable"><a href="#非索引-隔离级别Serializable" class="headerlink" title="非索引+隔离级别Serializable"></a>非索引+隔离级别Serializable</h5><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">---- address 是没有索引  id 是主键索引  隔离级别Serializable</span></span><br><span class="line">update student <span class="keyword">set</span> age <span class="operator">=</span> <span class="number">22</span> <span class="keyword">where</span> address <span class="operator">=</span> <span class="string">&#x27;shanghai&#x27;</span>; <span class="comment">----SQL10</span></span><br></pre></td></tr></table></figure>
+
+<p>SQL10：不会加锁</p>
+<p>加锁过程：隔离级别Serializable是串行执行的SQL，不会有并行操作。所以不需要加锁就可以。</p>
+<p>总结一下。MySQL主要是给索引加锁，而不是给数据加锁（数据加锁是通过给索引加锁去体现的）。所以在分析加锁的时候，分析建表的索引和隔离级别，在不同隔离级别锁加的类型也不一样。在走到索引和没走到索引时候也不一样。所以遇到问题还是要具体分析。我们在写SQL时候就要尽量避免锁大批量数据，这会导致MySQL性能下降。不过一般情况分析死锁都是通过InnDB引擎日志去分析，日志里面有详细的MySQL执行的过程。</p>
+<p>分析加锁过程可以使用<code>select * from performance_schema.data_locks;</code>查看加锁状态和过程</p>
+<p>本篇文章都是基于MySQL5.7版本讨论。MySQL8.0版本加锁逻辑发生变化</p>
+<h3 id="如何排查分析MySQL死锁"><a href="#如何排查分析MySQL死锁" class="headerlink" title="如何排查分析MySQL死锁"></a>如何排查分析MySQL死锁</h3><p>当你的程序出现死锁的时候，会有异常抛出了。这个时候你会看到这样的错误栈信息。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">org.springframework.dao.DeadlockLoserDataAccessException: Error updating database. Cause: com.mysql.jdbc.exceptions.jdbc4.MySQLTransactionRollbackException: Deadlock found when trying to get lock; <span class="keyword">try</span> restarting transaction The error may involve defaultParameterMap The error occurred <span class="keyword">while</span> setting parameters SQL: update dpm_doctor_patient_tag_mapping set is_del = <span class="number">1</span>, update_time = now() where is_del = <span class="number">0</span> AND tag_id = ? AND patient_id = ? AND biz_id = ? </span><br></pre></td></tr></table></figure>
+
+<p><code>DeadlockLoserDataAccessException</code>死锁的异常，导致死锁的SQL，我们能从这个地方看出来这个是一个update语句导致的死锁。</p>
+<p>首先不要慌，死锁MySQL会帮你把死锁的语句停止执行，所以不会产生数据太大异常。数据库不会因此被死锁拖垮，至少我没碰到过被死锁拖垮，一般都是因为复杂查询计算过多或者查询时候没有带分页全表扫描数据，然后把整张表几百万数据吐出导致内存和MySQL的IO都受不了。</p>
+<h4 id="查看死锁InnoDB日志"><a href="#查看死锁InnoDB日志" class="headerlink" title="查看死锁InnoDB日志"></a>查看死锁InnoDB日志</h4><p>执行  <code>show engine innodb status</code> 查看innodb的日志 。<code>show engine innodb status</code>显示的不是当前状态，而是过去某个时间范围内InnoDB存储引擎的状态。</p>
+<p><code>show engine innodb status</code>主要包括以下几个部分：</p>
+<table>
+<thead>
+<tr>
+<th align="left">BACKGROUND THREAD</th>
+<th align="left">后台Master线程</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">SEMAPHORES</td>
+<td align="left">信号量信息</td>
+</tr>
+<tr>
+<td align="left">LATEST DETECTED DEADLOCK</td>
+<td align="left">最近一次死锁信息，只有产生过死锁才会有</td>
+</tr>
+<tr>
+<td align="left">TRANSACTIONS</td>
+<td align="left">事务信息</td>
+</tr>
+<tr>
+<td align="left">FILE I/O</td>
+<td align="left">IO Thread信息</td>
+</tr>
+<tr>
+<td align="left">INSERT BUFFER AND ADAPTIVE HASH INDEX</td>
+<td align="left">INSERT BUFFER和自适应HASH索引</td>
+</tr>
+<tr>
+<td align="left">LOG</td>
+<td align="left">日志</td>
+</tr>
+<tr>
+<td align="left">BUFFER POOL AND MEMORY</td>
+<td align="left">BUFFER POOL和内存</td>
+</tr>
+<tr>
+<td align="left">INDIVIDUAL BUFFER POOL INFO</td>
+<td align="left">如果设置了多个BUFFER POOL实例，这里显示每个BUFFER POOL信息。可通过innodb_buffer_pool_instances参数设置</td>
+</tr>
+<tr>
+<td align="left">ROW OPERATIONS‍‍</td>
+<td align="left">行操作统计信息‍‍</td>
+</tr>
+<tr>
+<td align="left">END OF INNODB MONITOR OUTPU</td>
+<td align="left">输出结束语</td>
+</tr>
+</tbody></table>
+<p>我们不怎么看其他的InnoDB线程的信息，主要关注死锁信息<code>LATEST DETECTED DEADLOCK</code>。其他的线程状态主要是给InnoDB引擎调优用的，目前对于死锁问题用不上，后面可以单独写博客来讨论。</p>
+<p>执行完<code>show engine innodb status</code>InnoDB日志信息。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;</span><br><span class="line">2022-04-08 09:40:50 7fa7ee1ac700 INNODB MONITOR OUTPUT</span><br><span class="line">&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;</span><br><span class="line">Per second averages calculated from the last 31 seconds</span><br><span class="line">-----------------</span><br><span class="line">BACKGROUND THREAD</span><br><span class="line">-----------------</span><br><span class="line">srv_master_thread loops: 54129291 srv_active, 0 srv_shutdown, 1091686 srv_idle</span><br><span class="line">srv_master_thread log flush and writes: 55220740</span><br><span class="line">----------</span><br><span class="line">SEMAPHORES</span><br><span class="line">----------</span><br><span class="line">OS WAIT ARRAY INFO: reservation count 180912399</span><br><span class="line">OS WAIT ARRAY INFO: signal count 450020663</span><br><span class="line">Mutex spin waits 2575321893, rounds 2123769560, OS waits 611665</span><br><span class="line">RW-shared spins 317381636, rounds 5602600354, OS waits 161229754</span><br><span class="line">RW-excl spins 46125877, rounds 1211134939, OS waits 17742827</span><br><span class="line">Spin rounds per wait: -1.24 mutex, 17.65 RW-shared, 26.26 RW-excl</span><br><span class="line">------------------------</span><br><span class="line">LATEST DETECTED DEADLOCK</span><br><span class="line">------------------------</span><br><span class="line">2022-04-08 02:33:29 7fa7ef3fd700</span><br><span class="line">*** (1) TRANSACTION:</span><br><span class="line">TRANSACTION 152788457, ACTIVE 0.005 sec fetching rows</span><br><span class="line">mysql tables in use 3, locked 3</span><br><span class="line">LOCK WAIT 211 lock struct(s), heap size 30248, 4 row lock(s)</span><br><span class="line">LOCK BLOCKING MySQL thread id: 12966513 block 12966516</span><br><span class="line">MySQL thread id 12966516, OS thread handle 0x7fa7dbcda700, query id 18140439426 172.16.194.16 wm_dpm Searching rows for update</span><br><span class="line">update dpm_doctor_patient_tag_mapping set is_del &#x3D; 1, update_time &#x3D; now()</span><br><span class="line">        where is_del &#x3D; 0</span><br><span class="line">         AND tag_id &#x3D; 1651249269350592515 </span><br><span class="line">         AND patient_id &#x3D; 1706948639173230596 </span><br><span class="line">         AND biz_id &#x3D; 0</span><br><span class="line">*** (1) WAITING FOR THIS LOCK TO BE GRANTED:</span><br><span class="line">RECORD LOCKS space id 306 page no 79894 n bits 200 index &#96;PRIMARY&#96; of table &#96;dpm&#96;.&#96;dpm_doctor_patient_tag_mapping&#96; trx id 152788457 lock_mode X locks rec but not gap waiting</span><br><span class="line">Record lock, heap no 5 PHYSICAL RECORD: n_fields 15; compact format; info bits 0</span><br><span class="line"> 0: len 8; hex 17b02034c881c002; asc    4    ;;</span><br><span class="line"> 1: len 6; hex 000009187b19; asc     &#123; ;;</span><br><span class="line"> 2: len 7; hex 160000037528f7; asc     u( ;;</span><br><span class="line"> 3: len 8; hex 16ea6a763743f003; asc   jv7C  ;;</span><br><span class="line"> 4: len 8; hex 17724a233d83d001; asc  rJ#&#x3D;   ;;</span><br><span class="line"> 5: len 8; hex 17724a233c03d002; asc  rJ#&lt;   ;;</span><br><span class="line"> 6: len 8; hex 145d63d76b80a001; asc  ]c k   ;;</span><br><span class="line"> 7: len 8; hex 17724a344cc09005; asc  rJ4L   ;;</span><br><span class="line"> 8: len 8; hex 17b02034c381c005; asc    4    ;;</span><br><span class="line"> 9: len 1; hex 01; asc  ;;</span><br><span class="line"> 10: len 8; hex 0000000000000000; asc         ;;</span><br><span class="line"> 11: len 8; hex 0000000000000000; asc         ;;</span><br><span class="line"> 12: len 5; hex 99aa02b982; asc      ;;</span><br><span class="line"> 13: len 5; hex 99ac8eba05; asc      ;;</span><br><span class="line"> 14: len 8; hex 8000000000000000; asc         ;;</span><br><span class="line"></span><br><span class="line">*** (2) TRANSACTION:</span><br><span class="line">TRANSACTION 152788460, ACTIVE 0.004 sec fetching rows</span><br><span class="line">mysql tables in use 3, locked 3</span><br><span class="line">211 lock struct(s), heap size 30248, 3 row lock(s)</span><br><span class="line">MySQL thread id 12966513, OS thread handle 0x7fa7ef3fd700, query id 18140439432 172.16.194.16 wm_dpm Searching rows for update</span><br><span class="line">update dpm_doctor_patient_tag_mapping set is_del &#x3D; 1, update_time &#x3D; now()</span><br><span class="line">        where is_del &#x3D; 0</span><br><span class="line">         AND tag_id &#x3D; 1651249269350592515 </span><br><span class="line">         AND patient_id &#x3D; 1706899669763866629 </span><br><span class="line">         AND biz_id &#x3D; 0</span><br><span class="line">*** (2) HOLDS THE LOCK(S):</span><br><span class="line">RECORD LOCKS space id 306 page no 79894 n bits 200 index &#96;PRIMARY&#96; of table &#96;dpm&#96;.&#96;dpm_doctor_patient_tag_mapping&#96; trx id 152788460 lock_mode X locks rec but not gap</span><br><span class="line">Record lock, heap no 5 PHYSICAL RECORD: n_fields 15; compact format; info bits 0</span><br><span class="line"> 0: len 8; hex 17b02034c881c002; asc    4    ;;</span><br><span class="line"> 1: len 6; hex 000009187b19; asc     &#123; ;;</span><br><span class="line"> 2: len 7; hex 160000037528f7; asc     u( ;;</span><br><span class="line"> 3: len 8; hex 16ea6a763743f003; asc   jv7C  ;;</span><br><span class="line"> 4: len 8; hex 17724a233d83d001; asc  rJ#&#x3D;   ;;</span><br><span class="line"> 5: len 8; hex 17724a233c03d002; asc  rJ#&lt;   ;;</span><br><span class="line"> 6: len 8; hex 145d63d76b80a001; asc  ]c k   ;;</span><br><span class="line"> 7: len 8; hex 17724a344cc09005; asc  rJ4L   ;;</span><br><span class="line"> 8: len 8; hex 17b02034c381c005; asc    4    ;;</span><br><span class="line"> 9: len 1; hex 01; asc  ;;</span><br><span class="line"> 10: len 8; hex 0000000000000000; asc         ;;</span><br><span class="line"> 11: len 8; hex 0000000000000000; asc         ;;</span><br><span class="line"> 12: len 5; hex 99aa02b982; asc      ;;</span><br><span class="line"> 13: len 5; hex 99ac8eba05; asc      ;;</span><br><span class="line"> 14: len 8; hex 8000000000000000; asc         ;;</span><br><span class="line"></span><br><span class="line">*** (2) WAITING FOR THIS LOCK TO BE GRANTED:</span><br><span class="line">RECORD LOCKS space id 306 page no 110314 n bits 824 index &#96;idx_tag_id&#96; of table &#96;dpm&#96;.&#96;dpm_doctor_patient_tag_mapping&#96; trx id 152788460 lock_mode X locks rec but not gap waiting</span><br><span class="line">Record lock, heap no 434 PHYSICAL RECORD: n_fields 2; compact format; info bits 0</span><br><span class="line"> 0: len 8; hex 16ea6a763743f003; asc   jv7C  ;;</span><br><span class="line"> 1: len 8; hex 17b02034c881c002; asc    4    ;;</span><br><span class="line"></span><br><span class="line">*** WE ROLL BACK TRANSACTION (2)</span><br></pre></td></tr></table></figure>
+
+<h4 id="锁报错分析"><a href="#锁报错分析" class="headerlink" title="锁报错分析"></a>锁报错分析</h4><p>我们来分析一下这个InnoDB最后执行的内容。这个日志打印的最近31秒的日志信息，这里主要分析在<code>LATEST DETECTED DEADLOCK</code>以后的信息。大致翻译一下上面的内容</p>
+<p>事务1，事务Id =152788457。表里数据，用三条锁三条，然后等待第四条记录上锁。然后锁阻塞了，阻塞线程Id是 12966513线程 阻塞 12966516线程。查找数据为了更新（是一个更新数据的一个当前读的状态）</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">--- update语句 patient_id和tag_id是普通索引。</span></span><br><span class="line">update dpm_doctor_patient_tag_mapping <span class="keyword">set</span> is_del <span class="operator">=</span> <span class="number">1</span>, update_time <span class="operator">=</span> now() <span class="keyword">where</span> is_del <span class="operator">=</span> <span class="number">0</span> <span class="keyword">AND</span> tag_id <span class="operator">=</span> <span class="number">1651249269350592515</span>  <span class="keyword">AND</span> patient_id <span class="operator">=</span> <span class="number">1706948639173230596</span>  <span class="keyword">AND</span> biz_id <span class="operator">=</span> <span class="number">0</span></span><br></pre></td></tr></table></figure>
+
+<p>等待锁被释放，记录锁定在空间（id）306 页编号 79894的主键索引的表上，这次事务（事务Id 152788457）使用的是X 锁，没有GAP锁，5号堆（heap）的物理记录.（update语句是需要当前查，所以在更新数据要查询最新的数据，然后把内容更新。这里表索引是tag_id和patient_id字段。)</p>
+<p>事务2，事务Id=152788460。表里数据，用三条锁三条，然后等待第四条记录上锁。然后锁阻塞了，线程Id是 12966513 。查找数据为了更新（是一个更新数据的一个当前读的状态）</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">--- update语句 patient_id和tag_id是普通索引。</span></span><br><span class="line">update dpm_doctor_patient_tag_mapping <span class="keyword">set</span> is_del <span class="operator">=</span> <span class="number">1</span>, update_time <span class="operator">=</span> now() <span class="keyword">where</span> is_del <span class="operator">=</span> <span class="number">0</span> <span class="keyword">AND</span> tag_id <span class="operator">=</span> <span class="number">1651249269350592515</span>  <span class="keyword">AND</span> patient_id <span class="operator">=</span> <span class="number">1706899669763866629</span> <span class="keyword">AND</span> biz_id <span class="operator">=</span> <span class="number">0</span></span><br></pre></td></tr></table></figure>
+
+<p>持有锁，记录锁定在空间（id）306 页编号 79894的主键索引的表上，这次事务（事务Id 152788460）使用的是X 锁，没有GAP锁，5号堆（heap）的物理记录.</p>
+<p>等待释放锁,记录被锁在空间（Id）306 页编号110314的 idx_tag_id的索引的表上。这次事务（事务Id 152788460）使用的是X 锁，没有GAP锁，434号堆（heap）的物理记录。</p>
+<p>我们回滚了这两条事务。</p>
+<p>翻译完上面的内容，我们整理一下思路，然后仔细看下，细节</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">事务1 Id 152788457 在执行update语句时等待主键索引上的行锁释放（ WAITING FOR THIS LOCK TO BE GRANTED: RECORD LOCKS space id 306 page no 79894 n bits 200 index &#96;PRIMARY&#96;）</span><br><span class="line">事务2 Id 152788460 在执行 update 语句时锁住了主键索引数据（HOLDS THE LOCK(S):RECORD LOCKS space id 306 page no 79894 n bits 200 index &#96;PRIMARY&#96;）</span><br><span class="line">事务2 Id 152788460 在执行 update 语句时等待idx_tag_id索引释放（WAITING FOR THIS LOCK TO BE GRANTED:RECORD LOCKS space id 306 page no 110314 n bits 824 index &#96;idx_tag_id&#96; of table）等待的数据 （0: len 8; hex 16ea6a763743f003; asc   jv7C  ;; 1: len 8; hex 17b02034c881c002; asc    4    ;;）</span><br><span class="line">分析一下这个（0: len 8; hex 16ea6a763743f003; asc jv7C  ;;）和（1: len 8; hex 17b02034c881c002; asc 4  ;;）数据就能得出结论</span><br><span class="line">事务1 等待 事务2释放16ea6a763743f003和17b02034c881c002主键索引。</span><br><span class="line">事务2 持有 16ea6a763743f003和17b02034c881c002主键索引。</span><br><span class="line">事务1 持有 16ea6a763743f003和17b02034c881c002主键索引的idx_tag_id索引。</span><br><span class="line">事务1和事务2相互依赖，锁相互排斥，形成死锁。</span><br></pre></td></tr></table></figure>
+
+<p>分析原因时索引加锁顺序导致死锁，根据上面我们之前的分析，是在二级索引加锁的时候发生的问题。</p>
+<p>我们分析一下SQL的执行计划</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">explain</span><br><span class="line">update dpm_doctor_patient_tag_mapping set is_del &#x3D; 1, update_time &#x3D; now() where is_del &#x3D; 0 AND tag_id &#x3D; 1651249269350592515 AND patient_id &#x3D; 1706899669763866629 AND biz_id &#x3D; 0</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://raw.githubusercontent.com/ClaudeWilliam/pic-blog/master/imgdeadlock14.png"></p>
+<p>通过看执行计划，可以发现，update语句用到了索引合并，也就是这条语句既用到了<code> idx_tag_id</code>索引，又用到了 <code>idx_patient_id</code>索引，<code>Using intersect(idx_tag_id,idx_patient_id)</code>的意思是通过两个索引获取交集。</p>
+<p>MySQL5.0之前，一个表一次只能使用一个索引，无法同时使用多个索引分别进行条件扫描。但是从5.1开始，引入了 <code>index merge</code> 优化技术，对同一个表可以使用多个索引分别进行条件扫描。</p>
+<p>SQL语句的执行过程</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">update dpm_doctor_patient_tag_mapping set is_del &#x3D; 1, update_time &#x3D; now() where is_del &#x3D; 0 AND tag_id &#x3D; 1651249269350592515 AND patient_id &#x3D; 1706899669763866629 AND biz_id &#x3D; 0</span><br></pre></td></tr></table></figure>
+
+<p>MySQL会根据 <code>tag_id= 1651249269350592515</code>这个条件，利用 <code>idx_tag_id</code> 索引找到叶子节点中保存的id值；同时会根据 <code>patient_id = 1706899669763866629</code>这个条件，利用 <code>idx_paient_id</code> 索引找到叶子节点中保存的id值；然后将找到的两组id值取交集，终通过交集后的id回表，也就是通过 PRIMARY 索引找到叶子节点中保存的行数据。</p>
+<p>这里可能很多人会有疑问了，<code>idx_tag_id</code> 已经是一个索引了，通过这个索引终只能找到多一条数据，那MySQL优化器为啥还要用两个索引取交集，再回表进行查询呢，这样不是多了一次 <code>idx_patient_id</code> 索引查找的过程么。我们来分析一下这两种情况执行过程。</p>
+<p>第一种 只用<code>idx_tag_id</code>索引 ：</p>
+<ul>
+<li>根据  <code>tag_id= 1651249269350592515</code>查询条件，利用<code>idx_tag_id</code> 索引找到叶子节点中保存的id值；</li>
+<li>通过找到的id值，利用PRIMARY索引找到叶子节点中保存的行数据；</li>
+<li>再通过 <code>patient_id =1706899669763866629</code> 条件对找到的行数据进行过滤。</li>
+</ul>
+<p>第二种 用到索引合并 <code>Using intersect(idx_tag_id,idx_patient_id)</code>：</p>
+<ul>
+<li>根据 ``tag_id = 1651249269350592515<code>查询条件，利用</code>idx_tag_id` 索引找到叶子节点中保存的id值；</li>
+<li>根据 <code>patient_id =1706899669763866629</code> 查询条件，利用 <code>idx_patient_id</code> 索引找到叶子节点中保存的id值；</li>
+<li>将1/2中找到的id值取交集，然后利用PRIMARY索引找到叶子节点中保存的行数据</li>
+</ul>
+<p>上边两种情况，主要区别在于，种是先通过一个索引把数据找到后，再用其它查询条件进行过滤；第二种是先通过两个索引查出的id值取交集，如果取交集后还存在id值，则再去回表将数据取出来。</p>
+<p>当优化器认为第二种情况执行成本比种要小时，就会出现索引合并。</p>
+<h4 id="解决方法"><a href="#解决方法" class="headerlink" title="解决方法"></a>解决方法</h4><p>从代码层面</p>
+<ul>
+<li>where 查询条件中，只传 <code>tag_id</code> ；</li>
+<li>使用 <code>force index(idx_tag_id)</code> 强制查询语句使用 <code>idx_tag_id</code> 索引；</li>
+<li>where 查询条件后边直接用 id 字段，通过主键去更新。</li>
+</ul>
+<p>从MySQL层面</p>
+<ul>
+<li>删除 <code>idx_patient_id</code> 索引或者建一个包含这俩列的联合索引；</li>
+<li>将MySQL优化器的<code>index merge</code>优化关闭。</li>
+</ul>
+<h4 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h4><p>本来是一次，线上问题排查。然后通过这个问题，我整理一下关于MySQL加锁和死锁的知识点，本来打算还要在放一个案例，但是感觉字数还是控制一下。不要把文章写的又臭又长，我在写这个文章的时候也借鉴了很多大佬的博客，学到很多知识，希望能给有问题的你提供一些思路。</p>
+<h3 id="杂记"><a href="#杂记" class="headerlink" title="杂记"></a>杂记</h3><p>MySQL中show指令的使用</p>
+<p>show tables或show tables from database_name; – 显示当前数据库中所有表的名称。<br> show databases; – 显示mysql中所有数据库的名称。<br>show columns from table_name from database_name; 或show columns from database_name.table_name; – 显示表中列名称。<br>show grants for user_name; – 显示一个用户的权限，显示结果类似于grant 命令。<br>.show index from table_name; – 显示表的索引。<br> show status; – 显示一些系统特定资源的信息，例如，正在运行的线程数量。<br> show variables; – 显示系统变量的名称和值。<br>show processlist; – 显示系统中正在运行的所有进程，也就是当前正在执行的查询。大多数用户可以查看他们自己的进程，但是如果他们拥有process权限，就可以查看所有人的进程，包括密码。<br>show table status; – 显示当前使用或者指定的database中的每个表的信息。信息包括表类型和表的最新更新时间。<br>show privileges; – 显示服务器所支持的不同权限。<br>show create database database_name; – 显示create database 语句是否能够创建指定的数据库。<br>show create table table_name; – 显示create database 语句是否能够创建指定的数据库。<br>show engines; – 显示安装以后可用的存储引擎和默认引擎。<br>show innodb status; – 显示innoDB存储引擎的状态。<br>show logs; – 显示BDB存储引擎的日志。<br>show warnings; – 显示最后一个执行的语句所产生的错误、警告和通知。<br>show errors; – 只显示最后一个执行语句所产生的错误。<br>show [storage] engines; –显示安装后的可用存储引擎和默认引擎。</p>
+<h3 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h3><p><a target="_blank" rel="noopener" href="https://z.itpub.net/article/detail/6FBBD180C376F42A19688938B2264D8A">MySQL 优化 index merge(索引合并)引起的死锁分析（强烈推荐）</a></p>
+<p><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/T5e-gb0MXxjBwbjGg6jIMg">MySQL 5.6.35 索引优化导致的死锁案例解析</a></p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">Author: </span><span class="post-copyright-info"><a href="mailto:undefined">Hill</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">Link: </span><span class="post-copyright-info"><a href="https://blog.51cloud.win/2022/10/10/MySQL%E4%B8%AD%E7%9A%84%E6%AD%BB%E9%94%81/">https://blog.51cloud.win/2022/10/10/MySQL%E4%B8%AD%E7%9A%84%E6%AD%BB%E9%94%81/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">Copyright Notice: </span><span class="post-copyright-info">All articles in this blog are licensed under <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> unless stating additionally.</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/MySql/">MySql</a><a class="post-meta__tags" href="/tags/%E6%95%B0%E6%8D%AE%E5%BA%93/">数据库</a></div><div class="post_share"><div class="social-share" data-image="/img/00035.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2022/11/20/Java%E7%9A%84%E6%80%A7%E8%83%BD%E6%B5%8B%E8%AF%95%E5%B7%A5%E5%85%B7JMH/"><img class="prev-cover" src="/img/00036.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">Previous Post</div><div class="prev_info">Java热点代码的性能测试工具JMH</div></div></a></div><div class="next-post pull-right"><a href="/2022/06/20/Reactor%E6%A8%A1%E5%BC%8F%E4%B8%8EEventLoop/"><img class="next-cover" src="/img/00034.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">Next Post</div><div class="next_info">Reactor模式与EventLoop</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span> Related Articles</span></div><div class="relatedPosts-list"><div><a href="/2022/02/10/MySQL中的锁和MVCC/" title="MySQL中的锁与MVCC"><img class="cover" src="/img/00033.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-02-10</div><div class="title">MySQL中的锁与MVCC</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="card-info-avatar is-center"><img class="avatar-img" src="/img/dog.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/><div class="author-info__name">Hill</div><div class="author-info__description">Stay Hungry Stay Foolish</div></div><div class="card-info-data"><div class="card-info-data-item is-center"><a href="/archives/"><div class="headline">Articles</div><div class="length-num">45</div></a></div><div class="card-info-data-item is-center"><a href="/tags/"><div class="headline">Tags</div><div class="length-num">25</div></a></div><div class="card-info-data-item is-center"><a href="/categories/"><div class="headline">Categories</div><div class="length-num">15</div></a></div></div><a class="button--animated" id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/ClaudeWilliam"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="https://github.com/ClaudeWilliam" target="_blank" title="github"><i class="GitHub"></i></a><a class="social-icon" href="https://twitter.com/qjqandjack" target="_blank" title="twitter"><i class="Twitter"></i></a></div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>Catalog</span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E6%AD%BB%E9%94%81"><span class="toc-number">2.</span> <span class="toc-text">什么是死锁</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#MySQL%E5%8A%A0%E9%94%81%E7%9A%84%E8%BF%87%E7%A8%8B"><span class="toc-number">3.</span> <span class="toc-text">MySQL加锁的过程</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#InnoDB%E5%BC%95%E6%93%8E%E6%98%AF%E5%A6%82%E4%BD%95%E5%8A%A0%E9%94%81%E7%9A%84"><span class="toc-number">3.1.</span> <span class="toc-text">InnoDB引擎是如何加锁的</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E4%B8%BB%E9%94%AE%E7%B4%A2%E5%BC%95-%E9%9A%94%E7%A6%BB%E7%BA%A7%E5%88%ABRC"><span class="toc-number">3.1.1.</span> <span class="toc-text">主键索引+隔离级别RC</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%94%AF%E4%B8%80%E7%B4%A2%E5%BC%95-%E9%9A%94%E7%A6%BB%E7%BA%A7%E5%88%ABRC"><span class="toc-number">3.1.2.</span> <span class="toc-text">唯一索引+隔离级别RC</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E9%9D%9E%E5%94%AF%E4%B8%80%E7%B4%A2%E5%BC%95-%E9%9A%94%E7%A6%BB%E7%BA%A7%E5%88%ABRC"><span class="toc-number">3.1.3.</span> <span class="toc-text">非唯一索引+隔离级别RC</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E9%9D%9E%E7%B4%A2%E5%BC%95-%E9%9A%94%E7%A6%BB%E7%BA%A7%E5%88%ABRC"><span class="toc-number">3.1.4.</span> <span class="toc-text">非索引+隔离级别RC</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E4%B8%BB%E9%94%AE%E7%B4%A2%E5%BC%95-%E9%9A%94%E7%A6%BB%E7%BA%A7%E5%88%ABRR"><span class="toc-number">3.1.5.</span> <span class="toc-text">主键索引+隔离级别RR</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%94%AF%E4%B8%80%E7%B4%A2%E5%BC%95-%E9%9A%94%E7%A6%BB%E7%BA%A7%E5%88%ABRR"><span class="toc-number">3.1.6.</span> <span class="toc-text">唯一索引+隔离级别RR</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E9%9D%9E%E5%94%AF%E4%B8%80%E7%B4%A2%E5%BC%95-%E9%9A%94%E7%A6%BB%E7%BA%A7%E5%88%ABRR"><span class="toc-number">3.1.7.</span> <span class="toc-text">非唯一索引+隔离级别RR</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E9%9D%9E%E7%B4%A2%E5%BC%95-%E9%9A%94%E7%A6%BB%E7%BA%A7%E5%88%ABRR"><span class="toc-number">3.1.8.</span> <span class="toc-text">非索引+隔离级别RR</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E9%9D%9E%E7%B4%A2%E5%BC%95-%E9%9A%94%E7%A6%BB%E7%BA%A7%E5%88%ABSerializable"><span class="toc-number">3.1.9.</span> <span class="toc-text">非索引+隔离级别Serializable</span></a></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%A6%82%E4%BD%95%E6%8E%92%E6%9F%A5%E5%88%86%E6%9E%90MySQL%E6%AD%BB%E9%94%81"><span class="toc-number">4.</span> <span class="toc-text">如何排查分析MySQL死锁</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%9F%A5%E7%9C%8B%E6%AD%BB%E9%94%81InnoDB%E6%97%A5%E5%BF%97"><span class="toc-number">4.1.</span> <span class="toc-text">查看死锁InnoDB日志</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%94%81%E6%8A%A5%E9%94%99%E5%88%86%E6%9E%90"><span class="toc-number">4.2.</span> <span class="toc-text">锁报错分析</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%A7%A3%E5%86%B3%E6%96%B9%E6%B3%95"><span class="toc-number">4.3.</span> <span class="toc-text">解决方法</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">4.4.</span> <span class="toc-text">总结</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9D%82%E8%AE%B0"><span class="toc-number">5.</span> <span class="toc-text">杂记</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8F%82%E8%80%83"><span class="toc-number">6.</span> <span class="toc-text">参考</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>Recent Post</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2022/11/20/Java%E7%9A%84%E6%80%A7%E8%83%BD%E6%B5%8B%E8%AF%95%E5%B7%A5%E5%85%B7JMH/" title="Java热点代码的性能测试工具JMH"><img src="/img/00036.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Java热点代码的性能测试工具JMH"/></a><div class="content"><a class="title" href="/2022/11/20/Java%E7%9A%84%E6%80%A7%E8%83%BD%E6%B5%8B%E8%AF%95%E5%B7%A5%E5%85%B7JMH/" title="Java热点代码的性能测试工具JMH">Java热点代码的性能测试工具JMH</a><time datetime="2022-11-20T12:03:14.000Z" title="Created 2022-11-20 20:03:14">2022-11-20</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/10/10/MySQL%E4%B8%AD%E7%9A%84%E6%AD%BB%E9%94%81/" title="MySQL的死锁"><img src="/img/00035.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="MySQL的死锁"/></a><div class="content"><a class="title" href="/2022/10/10/MySQL%E4%B8%AD%E7%9A%84%E6%AD%BB%E9%94%81/" title="MySQL的死锁">MySQL的死锁</a><time datetime="2022-10-10T12:03:14.000Z" title="Created 2022-10-10 20:03:14">2022-10-10</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/06/20/Reactor%E6%A8%A1%E5%BC%8F%E4%B8%8EEventLoop/" title="Reactor模式与EventLoop"><img src="/img/00034.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Reactor模式与EventLoop"/></a><div class="content"><a class="title" href="/2022/06/20/Reactor%E6%A8%A1%E5%BC%8F%E4%B8%8EEventLoop/" title="Reactor模式与EventLoop">Reactor模式与EventLoop</a><time datetime="2022-06-20T12:03:14.000Z" title="Created 2022-06-20 20:03:14">2022-06-20</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/02/10/MySQL%E4%B8%AD%E7%9A%84%E9%94%81%E5%92%8CMVCC/" title="MySQL中的锁与MVCC"><img src="/img/00033.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="MySQL中的锁与MVCC"/></a><div class="content"><a class="title" href="/2022/02/10/MySQL%E4%B8%AD%E7%9A%84%E9%94%81%E5%92%8CMVCC/" title="MySQL中的锁与MVCC">MySQL中的锁与MVCC</a><time datetime="2022-02-10T12:03:14.000Z" title="Created 2022-02-10 20:03:14">2022-02-10</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/10/10/SpringBoot%E5%90%AF%E5%8A%A8%E7%9A%84%E8%BF%87%E7%A8%8B%E5%88%86%E6%9E%90/" title="SpringBoot启动的过程分析"><img src="/img/00032.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="SpringBoot启动的过程分析"/></a><div class="content"><a class="title" href="/2021/10/10/SpringBoot%E5%90%AF%E5%8A%A8%E7%9A%84%E8%BF%87%E7%A8%8B%E5%88%86%E6%9E%90/" title="SpringBoot启动的过程分析">SpringBoot启动的过程分析</a><time datetime="2021-10-10T12:03:14.000Z" title="Created 2021-10-10 20:03:14">2021-10-10</time></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2017 - 2022 By Hill</div><div class="framework-info"><span>Framework </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>Theme </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="Read Mode"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="Toggle Between Light And Dark Mode"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="Toggle between single-column and double-column"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="Setting"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="Table Of Contents"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="Back To Top"><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><div class="js-pjax"><script>if (!window.MathJax) {
+  window.MathJax = {
+    loader: {
+      source: {
+        '[tex]/amsCd': '[tex]/amscd'
+      }
+    },
+    tex: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"]],
+      tags: 'ams'
+    },
+    options: {
+      renderActions: {
+        findScript: [10, doc => {
+          for (const node of document.querySelectorAll('script[type^="math/tex"]')) {
+            const display = !!node.type.match(/; *mode=display/)
+            const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display)
+            const text = document.createTextNode('')
+            node.parentNode.replaceChild(text, node)
+            math.start = {node: text, delim: '', n: 0}
+            math.end = {node: text, delim: '', n: 0}
+            doc.math.push(math)
+          }
+        }, ''],
+        addClass: [200,() => {
+          document.querySelectorAll('mjx-container:not([display=\'true\']').forEach( node => {
+            const target = node.parentNode
+            if (!target.classList.contains('has-jax')) {
+              target.classList.add('mathjax-overflow')
+            }
+          })
+        }, '', false]
+      }
+    }
+  }
+  
+  const script = document.createElement('script')
+  script.src = 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js'
+  script.id = 'MathJax-script'
+  script.async = true
+  document.head.appendChild(script)
+} else {
+  MathJax.startup.document.state(0)
+  MathJax.texReset()
+  MathJax.typeset()
+}</script></div><canvas class="fireworks" mobile="false"></canvas><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/dist/fireworks.min.js"></script><script defer="defer" id="ribbon" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/dist/canvas-ribbon.min.js" size="150" alpha="0.6" zIndex="-1" mobile="false" data-click="false"></script><script defer="defer" id="fluttering_ribbon" mobile="true" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/dist/canvas-fluttering-ribbon.min.js"></script><script id="canvas_nest" defer="defer" color="0,0,255" opacity="0.7" zIndex="-1" count="99" mobile="false" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/dist/canvas-nest.min.js"></script><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/dist/activate-power-mode.min.js"></script><script>POWERMODE.colorful = true;
+POWERMODE.shake = true;
+POWERMODE.mobile = false;
+document.body.addEventListener('input', POWERMODE);
+</script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

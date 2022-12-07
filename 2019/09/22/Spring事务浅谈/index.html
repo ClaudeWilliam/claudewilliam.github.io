@@ -1,0 +1,296 @@
+<!DOCTYPE html><html lang="zh-Hans" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Spring事务浅谈 | Hill's Notes</title><meta name="keywords" content="java,spring"><meta name="author" content="Hill"><meta name="copyright" content="Hill"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="Spring事务浅谈什么是事务简单点来说，就是一组被包装过的操作（一般是更新数据库，插入或者更新多个库的操作，一般读数据库不需要事务，都是在写操作的时候）。包装过的这些操作是可以回滚的。简单点说，就是这组操作中有一个或者失败，就全体失败回滚，只有全部成功才能才算执行完成。（比较大白话），事务是一个不可分割操作序列，也是数据库并发控制的基本单位，其执行的结果必须使数据库从一种一致性状态变到另一种一致">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Spring事务浅谈">
+<meta property="og:url" content="https://blog.51cloud.win/2019/09/22/Spring%E4%BA%8B%E5%8A%A1%E6%B5%85%E8%B0%88/index.html">
+<meta property="og:site_name" content="Hill&#39;s Notes">
+<meta property="og:description" content="Spring事务浅谈什么是事务简单点来说，就是一组被包装过的操作（一般是更新数据库，插入或者更新多个库的操作，一般读数据库不需要事务，都是在写操作的时候）。包装过的这些操作是可以回滚的。简单点说，就是这组操作中有一个或者失败，就全体失败回滚，只有全部成功才能才算执行完成。（比较大白话），事务是一个不可分割操作序列，也是数据库并发控制的基本单位，其执行的结果必须使数据库从一种一致性状态变到另一种一致">
+<meta property="og:locale">
+<meta property="og:image" content="https://blog.51cloud.win/img/00012.jpg">
+<meta property="article:published_time" content="2019-09-22T01:21:08.000Z">
+<meta property="article:modified_time" content="2021-04-17T05:35:49.728Z">
+<meta property="article:author" content="Hill">
+<meta property="article:tag" content="java">
+<meta property="article:tag" content="spring">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://blog.51cloud.win/img/00012.jpg"><link rel="shortcut icon" href="/img/flag.jpg"><link rel="canonical" href="https://blog.51cloud.win/2019/09/22/Spring%E4%BA%8B%E5%8A%A1%E6%B5%85%E8%B0%88/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: 'Copy successfully',
+    error: 'Copy error',
+    noSupport: 'The browser does not support'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  date_suffix: {
+    just: 'Just',
+    min: 'minutes ago',
+    hour: 'hours ago',
+    day: 'days ago',
+    month: 'months ago'
+  },
+  copyright: {"limitCount":50,"languages":{"author":"Author: Hill","link":"Link: ","source":"Source: Hill's Notes","info":"Copyright is owned by the author. For commercial reprints, please contact the author for authorization. For non-commercial reprints, please indicate the source."}},
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    jQuery: 'https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js',
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+    },
+    fancybox: {
+      js: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isanchor: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = { 
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2021-04-17 13:35:49'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    })(window)</script><meta name="generator" content="Hexo 5.4.0"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="author-avatar"><img class="avatar-img" src="/img/dog.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data"><div class="data-item is-center"><div class="data-item-link"><a href="/archives/"><div class="headline">Articles</div><div class="length-num">45</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/tags/"><div class="headline">Tags</div><div class="length-num">25</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/categories/"><div class="headline">Categories</div><div class="length-num">15</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fa fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fa fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('/img/00012.jpg')"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">Hill's Notes</a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fa fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fa fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">Spring事务浅谈</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">Created</span><time class="post-meta-date-created" datetime="2019-09-22T01:21:08.000Z" title="Created 2019-09-22 09:21:08">2019-09-22</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">Updated</span><time class="post-meta-date-updated" datetime="2021-04-17T05:35:49.728Z" title="Updated 2021-04-17 13:35:49">2021-04-17</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/spring/">spring</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="Spring事务浅谈"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">Post View:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h3 id="Spring事务浅谈"><a href="#Spring事务浅谈" class="headerlink" title="Spring事务浅谈"></a>Spring事务浅谈</h3><h4 id="什么是事务"><a href="#什么是事务" class="headerlink" title="什么是事务"></a>什么是事务</h4><p>简单点来说，就是一组被包装过的操作（一般是更新数据库，插入或者更新多个库的操作，一般读数据库不需要事务，都是在写操作的时候）。包装过的这些操作是可以回滚的。简单点说，就是这组操作中有一个或者失败，就全体失败回滚，只有全部成功才能才算执行完成。（比较大白话），<strong>事务是一个不可分割操作序列，也是数据库并发控制的基本单位，其执行的结果必须使数据库从一种一致性状态变到另一种一致性状态。</strong>一般事务会有四个属性（ACDI）原子性，一致性，隔离性，持久性。具体详细的内容我之前博客是有的详细的介绍。<a href="https://blog.51cloud.win/2017/06/17/%E4%BA%8B%E5%8A%A1/#more">事务</a></p>
+<h4 id="Spring的事务管理"><a href="#Spring的事务管理" class="headerlink" title="Spring的事务管理"></a>Spring的事务管理</h4><p>上面说的事务，是事务的基本概念，一般事务多与数据库相关，比如mysql，jdbc等等都有对事务的支持。但是除了数据库，随着机器的不断增多，越来越多的分布式事务出现了。比如现在比较常用的方式就是使用事务的mq，来实现分布式事务的。也有什么两步提交，三步提交理论。我们不详细的展开了。这里我们重点是说Spring对事务的管理。<strong>Spring没有事务，他只是抽象出对事务的管理接口<code>TransactionManager</code>，然后其他组件（jdbc）去实现spring的接口。让spring可以管理数据库相关的事务</strong>。下面就是内部的事务管理器的类图。</p>
+<p><img src="https://raw.githubusercontent.com/ClaudeWilliam/pic-blog/master/img/TransactionManager.png"></p>
+<p>Spring事务管理器的描述</p>
+<table>
+<thead>
+<tr>
+<th>事务管理器</th>
+<th>使用场景</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>DataSourceTransactionManager</code></td>
+<td>数据源事务管理器，提供对单个<code>javax.sql.DataSource</code>事务管理，用于Spring JDBC抽象框架、iBATIS或MyBatis框架的事务管理；</td>
+</tr>
+<tr>
+<td><code>JdoTransactionManager</code></td>
+<td>提供对单个<code>javax.jdo.PersistenceManagerFactor</code>y事务管理，用于集成JDO框架时的事务管理；</td>
+</tr>
+<tr>
+<td><code>JpaTransactionManager</code></td>
+<td>提供对单个<code>javax.persistence.EntityManagerFactory</code>事务支持，用于集成JPA实现框架时的事务管理；</td>
+</tr>
+<tr>
+<td><code>WebSphereUowTransactionManager</code></td>
+<td>Spring提供的对WebSphere 6.0+应用服务器事务管理器的适配器，此适配器用于对应用服务器提供的高级事务的支持；</td>
+</tr>
+<tr>
+<td><code>WebLogicJtaTransactionManager</code></td>
+<td>Spring提供的对WebLogic 8.1+应用服务器事务管理器的适配器，此适配器用于对应用服务器提供的高级事务的支持。</td>
+</tr>
+</tbody></table>
+<p>在Spring中主要就是通过事务管理器来控制事务，只不过就是针对不同的框架做了不同的适配。 <strong>所谓事务管理，实质上就是按照给定的事务规则来执行提交或者回滚操作</strong>。</p>
+<p>Spring事务管理有三个比较基本的类。</p>
+<h5 id="1、定义事务操作的基本接口（与框架无关的操作）PlatformTransactionManager类"><a href="#1、定义事务操作的基本接口（与框架无关的操作）PlatformTransactionManager类" class="headerlink" title="1、定义事务操作的基本接口（与框架无关的操作）PlatformTransactionManager类"></a>1、定义事务操作的基本接口（与框架无关的操作）<code>PlatformTransactionManager</code>类</h5><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> org.springframework.transaction;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">PlatformTransactionManager</span> </span>&#123;</span><br><span class="line">    <span class="comment">//获取事务状态，包含事务这个只是一个接口</span></span><br><span class="line">    <span class="function">TransactionStatus <span class="title">getTransaction</span><span class="params">(TransactionDefinition var1)</span> <span class="keyword">throws</span> TransactionException</span>;</span><br><span class="line">	<span class="comment">//提交事务</span></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">commit</span><span class="params">(TransactionStatus var1)</span> <span class="keyword">throws</span> TransactionException</span>;</span><br><span class="line">	<span class="comment">//回滚事务</span></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">rollback</span><span class="params">(TransactionStatus var1)</span> <span class="keyword">throws</span> TransactionException</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这里面<code>AbstractPlatformTransactionManager</code>这个类是抽象类，这个类主要是实现各种通用的方法。这种设计模式，一般叫模板方法。</p>
+<h5 id="2、存储事务的状态的情况的基本接口TransactionStatus类"><a href="#2、存储事务的状态的情况的基本接口TransactionStatus类" class="headerlink" title="2、存储事务的状态的情况的基本接口TransactionStatus类"></a>2、存储事务的状态的情况的基本接口<code>TransactionStatus</code>类</h5><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> org.springframework.transaction;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.io.Flushable;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">TransactionStatus</span> <span class="keyword">extends</span> <span class="title">SavepointManager</span>, <span class="title">Flushable</span> </span>&#123;</span><br><span class="line">    <span class="comment">//返回当前交易是否为新事务。这个主要用于事务传播</span></span><br><span class="line">    <span class="function"><span class="keyword">boolean</span> <span class="title">isNewTransaction</span><span class="params">()</span></span>;</span><br><span class="line">	<span class="comment">//返回此事务是否在内部携带保存点，，即已基于保存点创建为嵌套事务</span></span><br><span class="line">    <span class="function"><span class="keyword">boolean</span> <span class="title">hasSavepoint</span><span class="params">()</span></span>;</span><br><span class="line">	<span class="comment">//设置事务仅回滚。这指示给事务管理器，事务的唯一可能结果可能是回滚，因为引发异常的方法，后者将触发回滚</span></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">setRollbackOnly</span><span class="params">()</span></span>;</span><br><span class="line">	<span class="comment">//返回事务是否已被标记为仅回滚</span></span><br><span class="line">    <span class="function"><span class="keyword">boolean</span> <span class="title">isRollbackOnly</span><span class="params">()</span></span>;</span><br><span class="line">	<span class="comment">//将session刷新到数据存储区：例如，所有受影响的Hibernate / JPA session</span></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">flush</span><span class="params">()</span></span>;</span><br><span class="line">	<span class="comment">//返回该事务是否完成，即是否已提交或回滚</span></span><br><span class="line">    <span class="function"><span class="keyword">boolean</span> <span class="title">isCompleted</span><span class="params">()</span></span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h5 id="3、关于事务的定义。定义了事务常用的常量。和获取事务属性获取方法"><a href="#3、关于事务的定义。定义了事务常用的常量。和获取事务属性获取方法" class="headerlink" title="3、关于事务的定义。定义了事务常用的常量。和获取事务属性获取方法"></a>3、关于事务的定义。定义了事务常用的常量。和获取事务属性获取方法</h5><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">package</span> org.springframework.transaction;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">TransactionDefinition</span> </span>&#123;</span><br><span class="line">    <span class="comment">//0-6传播策略</span></span><br><span class="line">    <span class="comment">//Support a current transaction; create a new one if none exists.</span></span><br><span class="line">    <span class="keyword">int</span> PROPAGATION_REQUIRED = <span class="number">0</span>;</span><br><span class="line">    <span class="comment">//Support a current transaction; execute non-transactionally if none exists.</span></span><br><span class="line">    <span class="keyword">int</span> PROPAGATION_SUPPORTS = <span class="number">1</span>;</span><br><span class="line">    <span class="comment">//Support a current transaction; throw an exception if no current transaction</span></span><br><span class="line">    <span class="keyword">int</span> PROPAGATION_MANDATORY = <span class="number">2</span>;</span><br><span class="line">    <span class="comment">//Create a new transaction, suspending the current transaction if one exists.</span></span><br><span class="line">    <span class="keyword">int</span> PROPAGATION_REQUIRES_NEW = <span class="number">3</span>;</span><br><span class="line">    <span class="comment">//Do not support a current transaction; rather always execute non-transactionall</span></span><br><span class="line">    <span class="keyword">int</span> PROPAGATION_NOT_SUPPORTED = <span class="number">4</span>;</span><br><span class="line">    <span class="comment">//Do not support a current transaction; throw an exception if a current transaction</span></span><br><span class="line">    <span class="keyword">int</span> PROPAGATION_NEVER = <span class="number">5</span>;</span><br><span class="line">    <span class="comment">// Execute within a nested transaction if a current transaction exists,</span></span><br><span class="line">    <span class="keyword">int</span> PROPAGATION_NESTED = <span class="number">6</span>;</span><br><span class="line">    <span class="comment">//事务隔离策略 1-4 8序列化</span></span><br><span class="line">    <span class="comment">//默认的事务隔离策略，一般mysql的数据库事务隔离策略是可重复读，mysql是使用多版本并发控制策略实现的。但是sqlServer，oracle都读已提交。</span></span><br><span class="line">    <span class="keyword">int</span> ISOLATION_DEFAULT = -<span class="number">1</span>;</span><br><span class="line">    <span class="comment">//读未提交</span></span><br><span class="line">    <span class="keyword">int</span> ISOLATION_READ_UNCOMMITTED = <span class="number">1</span>;</span><br><span class="line">    <span class="comment">//读已提交</span></span><br><span class="line">    <span class="keyword">int</span> ISOLATION_READ_COMMITTED = <span class="number">2</span>;</span><br><span class="line">    <span class="comment">//可重复读</span></span><br><span class="line">    <span class="keyword">int</span> ISOLATION_REPEATABLE_READ = <span class="number">4</span>;</span><br><span class="line">    <span class="comment">//串行化，没有并发</span></span><br><span class="line">    <span class="keyword">int</span> ISOLATION_SERIALIZABLE = <span class="number">8</span>;</span><br><span class="line">    <span class="comment">//使用，事务系统默认的超时。没有超时</span></span><br><span class="line">    <span class="keyword">int</span> TIMEOUT_DEFAULT = -<span class="number">1</span>;</span><br><span class="line">	<span class="comment">//获取传播策略</span></span><br><span class="line">    <span class="function"><span class="keyword">int</span> <span class="title">getPropagationBehavior</span><span class="params">()</span></span>;</span><br><span class="line">	<span class="comment">//获取隔离级别</span></span><br><span class="line">    <span class="function"><span class="keyword">int</span> <span class="title">getIsolationLevel</span><span class="params">()</span></span>;</span><br><span class="line">	<span class="comment">// 获取超时值</span></span><br><span class="line">    <span class="function"><span class="keyword">int</span> <span class="title">getTimeout</span><span class="params">()</span></span>;</span><br><span class="line">	<span class="comment">//是不是只读事务</span></span><br><span class="line">    <span class="function"><span class="keyword">boolean</span> <span class="title">isReadOnly</span><span class="params">()</span></span>;</span><br><span class="line">	<span class="comment">//获取事务名字</span></span><br><span class="line">    <span class="function">String <span class="title">getName</span><span class="params">()</span></span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>我们先简单的简介一下，我们这里主要是看接口中的方法，这些方法就是Spring平台抽象出来关于事务的操作，后面会详细介绍传播机制。和隔离策略。</p>
+<h4 id="Spring事务的5个属性"><a href="#Spring事务的5个属性" class="headerlink" title="Spring事务的5个属性"></a>Spring事务的5个属性</h4><p>从上面三个接口中我们也能猜个差不多，关于Spring事务抽象出来的5属性。1、传播行为；2、隔离级别；3、回滚规则；4、事务超时；5、是否只读；</p>
+<p><code>@Transactional(readOnly = true,rollbackFor = Exception.class,propagation = Propagation.REQUIRED,value = &quot;transactionManager&quot;,timeout = 10,isolation = Isolation.REPEATABLE_READ)</code>先写一个注解，后面我们会解释</p>
+<h5 id="1、传播行为"><a href="#1、传播行为" class="headerlink" title="1、传播行为"></a>1、传播行为</h5><p><strong>所谓事务的传播行为是指，如果在开始当前事务之前，一个事务上下文已经存在，此时有若干选项可以指定一个事务性方法的执行行为。所以事务的传播一定是有两个以上不同的事务同时执行。且这两个事务会有相互影响。</strong>（事务嵌套）这两个事务在一个线程。TransactionDefinition接口定义了如下几个表示传播行为的常量：</p>
+<p><code>PROPAGATION_REQUIRED</code>: 如果当前存在事务，则加入该事务；如果当前没有事务，则创建一个新的事务。</p>
+<p><code>PROPAGATION_SUPPORTS</code>: 如果当前存在事务，则加入该事务；如果当前没有事务，则以非事务的方式继续运行。</p>
+<p><code>PROPAGATION_MANDATORY</code>:如果当前存在事务，则加入该事务；如果当前没有事务，则抛出异常。</p>
+<p><code>PROPAGATION_REQUIRES_NEW</code>:创建一个新的事务，如果当前存在事务，则把当前事务挂起。</p>
+<p><code>PROPAGATION_NOT_SUPPORTED</code>: 以非事务方式运行，如果当前存在事务，则把当前事务挂起。</p>
+<p><code>PROPAGATION_NEVER</code>:以非事务方式运行，如果当前存在事务，则抛出异常。</p>
+<p><code>PROPAGATION_NESTED</code>:如果当前存在事务，则创建一个事务作为当前事务的嵌套事务来运行；如果当前没有事务，则该取值等价于TransactionDefinition.PROPAGATION_REQUIRED。（有内外事务才算嵌套，内部事务会依赖外部提交，外部事务提交才会提交。外部事务回滚内部事务也会回滚。内部事务不能单独的提交和回滚）。</p>
+<p>从上面我们可以看出来，除了嵌套事务是同时执行，就没有两个事务同时执行（内部还要依赖外部）。都是只有一个事务运行，或者没有事务运行。</p>
+<p>下面是<code>PROPAGATION_REQUIRES_NEW</code>和<code>PROPAGATION_NESTED</code>两种表现形式</p>
+<p><img src="https://raw.githubusercontent.com/ClaudeWilliam/pic-blog/master/img/PROPAGATION.png"></p>
+<p>Spring默认是传播策略PROPAGATION_REQUIRED</p>
+<p><code>@Transactional(propagation = Propagation.REQUIRED)</code> </p>
+<h5 id="2、隔离级别"><a href="#2、隔离级别" class="headerlink" title="2、隔离级别"></a>2、隔离级别</h5><p><strong>所谓事务的隔离级别是指若干个并发的事务之间的隔离程度</strong>。所以事务隔离是解决并发问题的。也就是当多个事务操作同一个热点数据的时候就会有数据一致性问题。一般专业数据就是脏读，幻读。简单点说就是读到数据，不是最终数据库持久化的数据。TransactionDefinition 接口中定义了五个表示隔离级别的常量。（也是数据库常见的）</p>
+<p><code>ISOLATION_READ_UNCOMMITTED</code>: RU 读未提交。</p>
+<p><code>ISOLATION_READ_COMMITTED</code>: RC  读以提交。</p>
+<p><code>ISOLATION_REPEATABLE_READ</code>: RR 可重复读。</p>
+<p><code>ISOLATION_SERIALIZABLE</code>: 串行化。</p>
+<p>默认的事务隔离策略，一般mysql的数据库事务隔离策略是可重复读，mysql是使用多版本并发控制策略实现的。但是sqlServer，oracle都读已提交。</p>
+<ul>
+<li>脏读(Drity Read)：<strong>某个事务</strong>已更新一份数据，<strong>另一个事务</strong>在此时读取了同一份数据，由于某些原因，前一个RollBack了操作，则后一个事务所读取的数据就会是不正确的。</li>
+<li>不可重复读(Non-repeatable read):在<strong>一个事务</strong>的两次查询之中数据不一致，这可能是两次查询过程中间插入了一个事务更新的原有的数据。<strong>即一次事务中不可已重复读取数据</strong></li>
+<li>幻读(Phantom Read):在<strong>一个事务</strong>的两次查询中数据笔数不一致，例如有一个事务查询了几列(Row)数据，而<strong>另一个事务</strong>却在此时插入了新的几列数据，先前的事务在接下来的查询中，就会发现有几列数据是它先前所没有的。</li>
+</ul>
+<p><img src="https://blog.51cloud.win/img/af5b9c1e-4517-3df2-ad62-af25d1672d12.jpg" alt="img"></p>
+<p>Spring默认是隔离级别 ISOLATION_REPEATABLE_READ</p>
+<p><code>@Transactional(isolation = Isolation.REPEATABLE_READ)</code> </p>
+<h5 id="3、回滚规则"><a href="#3、回滚规则" class="headerlink" title="3、回滚规则"></a>3、回滚规则</h5><p><strong>通常情况下，如果在事务中抛出了未检查异常（继承自 RuntimeException 的异常），则默认将回滚事务</strong>。如果没有抛出任何异常，或者抛出了已检查异常，则仍然提交事务。这通常也是大多数开发者希望的处理方式，也是 EJB 中的默认处理方式。但是，我们可以根据需要人为控制事务在抛出某些未检查异常时任然提交事务，或者在抛出某些已检查异常时回滚事务。<br>所以在事务中很多的时候，都要指定要捕获的异常类型。一般可以被抛出来的类。<code>Throwable,Exception,Error,RuntimeException </code>这些类。一般会指定为Exception。Spring默认回滚类RuntimeException</p>
+<p><code>@Transactional(rollbackFor=Exception.class)</code> </p>
+<h5 id="4、事务超时"><a href="#4、事务超时" class="headerlink" title="4、事务超时"></a>4、事务超时</h5><p><strong>所谓事务超时，就是指一个事务所允许执行的最长时间，如果超过该时间限制但事务还没有完成，则自动回滚事务。</strong>在 TransactionDefinition 中以 int 的值来表示超时时间，其单位是秒。Spring默认超时是-1.也就是没有超时。</p>
+<p><code>@Transactional(timeout=100)</code></p>
+<h5 id="5、是否只读"><a href="#5、是否只读" class="headerlink" title="5、是否只读"></a>5、是否只读</h5><p><strong>事务的只读属性是指，对事务性资源进行只读操作或者是读写操作。</strong>所谓事务性资源就是指那些被事务管理的资源，比如数据源、 JMS 资源，以及自定义的事务性资源等等。如果确定只对事务性资源进行只读操作，那么我们可以将事务标志为只读的，以提高事务处理的性能。在 TransactionDefinition接口中，以 boolean 类型来表示该事务是否只读。Spring中默认的只读是false</p>
+<p><code>@Transactional(readOnly=false)</code></p>
+<p>我们在最开始写的注解中，基本上所有值都使用，还有一个就是value。这个value是指定事务管理器。一般用于指定dataSource。一般用于多数据源时候去处理。</p>
+<h4 id="Spring-声明式事务管理"><a href="#Spring-声明式事务管理" class="headerlink" title="Spring 声明式事务管理"></a>Spring 声明式事务管理</h4><p>在Spring中大多数使用事务都是使用的声明式事务。<strong>Spring 的声明式事务管理是建立在 Spring AOP 机制之上的，其本质是对目标方法前后进行拦截，并在目标方法开始之前创建或者加入一个事务，在执行完目标方法之后根据执行情况提交或者回滚事务。</strong></p>
+<h5 id="开启事务"><a href="#开启事务" class="headerlink" title="开启事务"></a>开启事务</h5><p>一般事务开启分两种方式，一种是通过注解，一种是配置xml。随着注解越来越流行，现在使用xml配置的也不多的了。但是本质上都是一样的。都是启用了spring中配置好的一个Bean。</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">bean</span> <span class="attr">id</span>=<span class="string">&quot;transactionManager&quot;</span> <span class="attr">class</span>=<span class="string">&quot;org.springframework.jdbc.datasource.DataSourceTransactionManager&quot;</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">&quot;dataSource&quot;</span> <span class="attr">ref</span>=<span class="string">&quot;dataSource&quot;</span>/&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">bean</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>上面这种方法和<code>DataSourceTransactionManager transactionManager= new  DataSourceTransactionManager(datasource)</code>效果是一样的。一般用于SpringMVC项目。现在微服务大行其道，大家都使用<code>@EnableTransactionManagement </code>这个注解启用事务管理机制。</p>
+<h5 id="事务的使用"><a href="#事务的使用" class="headerlink" title="事务的使用"></a>事务的使用</h5><p>事务的使用是通过<code>@Transactional</code>注解。这个注解主要声明在类上或者方法上。如果声明在方法，表明这个方法是执行事务的。如果声明在类上，表示这个类所有的方法，都是事务方法。我们一般使用事务方法比较多。因为事务执行是很耗费性能。所以尽量减小事务的逻辑，一般只有update和insert才使用事务。这样有利于提高性能。</p>
+<p>但是select也可以使用事务。使用select的事务可以保证select查询是走的主库而不是从库（在数据库读写分离的时候会，在主库插入和从库读取有比较大延时），一般会把select和insert或update放到一起去执行。不用去在sql上去写<code>/*master*/</code>这种去强制sql去走主库。也就是只有执行事务时去从主库拿。其他的时候都走从库。</p>
+<p>同样的，<code>@Transactional</code>里面还有很可以配置的属性。我上面与介绍。你可以去根据自己业务需求去添加。</p>
+<h4 id="Spring事务使用的注意"><a href="#Spring事务使用的注意" class="headerlink" title="Spring事务使用的注意"></a>Spring事务使用的注意</h4><p><img src="https://raw.githubusercontent.com/ClaudeWilliam/pic-blog/master/img/image001.jpg"></p>
+<p>上面我们说Spring的事务是基于AOP去做的。也就是Spring对原有类TargetClass进行动态代理。对原有的方法进行加强。</p>
+<p>1、首先调用的拦截，先通过<code>CglibAopProxy$DynamicAdvisedInterceptor</code>进行拦截。然后执行<code>invokeWithinTransaction()</code>方法。来开始执行事务</p>
+<p>2、事务拦截器<code>TransactionInterceptor</code>拦截到对应的事务，然后进行增强和执行事务，在执行方法。</p>
+<p>3、通过<code>AbstractPlatformTransactionManager</code>去对事务的传播，事务的回滚规则做处理。</p>
+<p>4、执行业务方法。</p>
+<p>5、commit()或者rollback()提交给<code>DataSource</code>，让<code>DataSource</code>做处理。</p>
+<h5 id="Transactional-只能应用到-public-方法才有效"><a href="#Transactional-只能应用到-public-方法才有效" class="headerlink" title="@Transactional 只能应用到 public 方法才有效"></a>@Transactional 只能应用到 public 方法才有效</h5><p>只有<code>@Transactional </code>注解应用到 public 方法，才能进行事务管理。这是因为在使用 Spring AOP 代理时，Spring  中的 <code>TransactionInterceptor</code> 在目标方法执行前后进行拦截之前，<code>DynamicAdvisedInterceptor</code>（<code>CglibAopProxy</code> 的内部类）的的 intercept 方法或 <code>JdkDynamicAopProxy</code> 的 invoke 方法会间接调用 <code>AbstractFallbackTransactionAttributeSource</code>（Spring 通过这个类获取表 1. <code>@Transactional </code>注解的事务属性配置属性信息）的 <code>computeTransactionAttribute</code> 方法。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">protected</span> TransactionAttribute <span class="title">computeTransactionAttribute</span><span class="params">(Method method,</span></span></span><br><span class="line"><span class="function"><span class="params"></span></span></span><br><span class="line"><span class="function"><span class="params">    Class&lt;?&gt; targetClass)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// Don&#x27;t allow no-public methods as required.</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (allowPublicMethodsOnly() &amp;&amp; !Modifier.isPublic(method.getModifiers())) &#123;</span><br><span class="line"></span><br><span class="line"><span class="keyword">return</span> <span class="keyword">null</span>;&#125;</span><br></pre></td></tr></table></figure>
+
+<p>其实根本的原因，是AOP的cglib是生成代理类，把原有对象放到新的代理类中加强，但是私有方法不能在代理类中使用。所以也就不支持私有方法。</p>
+<h5 id="避免-Spring-的-AOP-的自调用问题"><a href="#避免-Spring-的-AOP-的自调用问题" class="headerlink" title="避免 Spring 的 AOP 的自调用问题"></a>避免 Spring 的 AOP 的自调用问题</h5><p>在 Spring 的 AOP 代理下，只有目标方法由外部调用，目标方法才由 Spring 生成的代理对象来管理，这会造成自调用问题。若同一类中的其他没有@Transactional 注解的方法内部调用有<code>@Transactional</code> 注解的方法，有<code>@Transactional</code> 注解的方法的事务被忽略，不会发生回滚。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">A</span></span>&#123;</span><br><span class="line">    </span><br><span class="line">   <span class="meta">@Transactional</span> </span><br><span class="line">   <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">createA</span><span class="params">()</span></span>&#123;</span><br><span class="line">       </span><br><span class="line">   &#125;</span><br><span class="line">     </span><br><span class="line">   <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">updateB</span><span class="params">()</span></span>&#123;</span><br><span class="line">        createA();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>createA()中的事务不会被实现。因为执行事务很关键一点，就是被<code>CglibAopProxy$DynamicAdvisedInterceptor</code>拦截器拦截。但是在同一个类中这个拦截器是拦截补刀updateB()方法调用createA()方法。他属于<strong>类内调用</strong>，所以不会触发事务。这个也是其他情况下使用Aop要注意的一点。这个是可以通过使用 AspectJ 取代 Spring AOP 代理，来解决问题。</p>
+<h4 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h4><p>​    Spring是没有事务，他是通过抽象接口和方法和定义一些事务相关的操作和事务管理器。然后让DataSource或者JTA这种去实现他的抽象，实现了Spring对事务的管理。同样Spring的声明式事务也是基于AOP去实现的。通过动态代理的方式来增强Target类的属性。在事务中也有常见的设计模式，比如模板方法和策略模式。他抽象方法让不同的框架去实现不同的策略，这个和Java的SPI和像。有时间可以多了解Dubbo的好多组件都是通过SPI去实现的。</p>
+<h4 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h4><p><a target="_blank" rel="noopener" href="https://blog.csdn.net/justloveyou_/article/details/73733278">Spring 事务管理机制概述</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_29347295/article/details/79019221">透彻的掌握 Spring 中@transactional 的使用</a></p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">Author: </span><span class="post-copyright-info"><a href="mailto:undefined">Hill</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">Link: </span><span class="post-copyright-info"><a href="https://blog.51cloud.win/2019/09/22/Spring%E4%BA%8B%E5%8A%A1%E6%B5%85%E8%B0%88/">https://blog.51cloud.win/2019/09/22/Spring%E4%BA%8B%E5%8A%A1%E6%B5%85%E8%B0%88/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">Copyright Notice: </span><span class="post-copyright-info">All articles in this blog are licensed under <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> unless stating additionally.</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/java/">java</a><a class="post-meta__tags" href="/tags/spring/">spring</a></div><div class="post_share"><div class="social-share" data-image="/img/00012.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2019/10/02/%E7%BC%93%E5%AD%98%E4%B8%8EDB%E4%B8%80%E8%87%B4%E6%80%A7%E9%97%AE%E9%A2%98/"><img class="prev-cover" src="/img/00016.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">Previous Post</div><div class="prev_info">缓存与DB一致性问题</div></div></a></div><div class="next-post pull-right"><a href="/2019/06/09/%E5%B8%83%E9%9A%86%E8%BF%87%E6%BB%A4%E5%99%A8/"><img class="next-cover" src="/img/00014.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">Next Post</div><div class="next_info">布隆过滤器</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span> Related Articles</span></div><div class="relatedPosts-list"><div><a href="/2017/10/25/ArrayQueue/" title="ArrayBlockingQueue"><img class="cover" src="/img/00002.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2017-10-25</div><div class="title">ArrayBlockingQueue</div></div></a></div><div><a href="/2018/10/05/Hash一致性算法与Java的简单实现/" title="一致性Hash算法与Java的简单实现"><img class="cover" src="/img/00005.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2018-10-05</div><div class="title">一致性Hash算法与Java的简单实现</div></div></a></div><div><a href="/2017/07/27/Java内存模型/" title="Java内存模型"><img class="cover" src="/img/00005.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2017-07-27</div><div class="title">Java内存模型</div></div></a></div><div><a href="/2020/07/16/Java的ClassLoader/" title="Java的ClassLoader"><img class="cover" src="/img/back.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2020-07-16</div><div class="title">Java的ClassLoader</div></div></a></div><div><a href="/2022/11/20/Java的性能测试工具JMH/" title="Java热点代码的性能测试工具JMH"><img class="cover" src="/img/00036.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-11-20</div><div class="title">Java热点代码的性能测试工具JMH</div></div></a></div><div><a href="/2017/09/17/LinkedHashMap/" title="LinkedHashMap"><img class="cover" src="/img/00008.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2017-09-17</div><div class="title">LinkedHashMap</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="card-info-avatar is-center"><img class="avatar-img" src="/img/dog.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/><div class="author-info__name">Hill</div><div class="author-info__description">Stay Hungry Stay Foolish</div></div><div class="card-info-data"><div class="card-info-data-item is-center"><a href="/archives/"><div class="headline">Articles</div><div class="length-num">45</div></a></div><div class="card-info-data-item is-center"><a href="/tags/"><div class="headline">Tags</div><div class="length-num">25</div></a></div><div class="card-info-data-item is-center"><a href="/categories/"><div class="headline">Categories</div><div class="length-num">15</div></a></div></div><a class="button--animated" id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/ClaudeWilliam"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="https://github.com/ClaudeWilliam" target="_blank" title="github"><i class="GitHub"></i></a><a class="social-icon" href="https://twitter.com/qjqandjack" target="_blank" title="twitter"><i class="Twitter"></i></a></div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>Catalog</span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#Spring%E4%BA%8B%E5%8A%A1%E6%B5%85%E8%B0%88"><span class="toc-number">1.</span> <span class="toc-text">Spring事务浅谈</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E4%BA%8B%E5%8A%A1"><span class="toc-number">1.1.</span> <span class="toc-text">什么是事务</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Spring%E7%9A%84%E4%BA%8B%E5%8A%A1%E7%AE%A1%E7%90%86"><span class="toc-number">1.2.</span> <span class="toc-text">Spring的事务管理</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#1%E3%80%81%E5%AE%9A%E4%B9%89%E4%BA%8B%E5%8A%A1%E6%93%8D%E4%BD%9C%E7%9A%84%E5%9F%BA%E6%9C%AC%E6%8E%A5%E5%8F%A3%EF%BC%88%E4%B8%8E%E6%A1%86%E6%9E%B6%E6%97%A0%E5%85%B3%E7%9A%84%E6%93%8D%E4%BD%9C%EF%BC%89PlatformTransactionManager%E7%B1%BB"><span class="toc-number">1.2.1.</span> <span class="toc-text">1、定义事务操作的基本接口（与框架无关的操作）PlatformTransactionManager类</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#2%E3%80%81%E5%AD%98%E5%82%A8%E4%BA%8B%E5%8A%A1%E7%9A%84%E7%8A%B6%E6%80%81%E7%9A%84%E6%83%85%E5%86%B5%E7%9A%84%E5%9F%BA%E6%9C%AC%E6%8E%A5%E5%8F%A3TransactionStatus%E7%B1%BB"><span class="toc-number">1.2.2.</span> <span class="toc-text">2、存储事务的状态的情况的基本接口TransactionStatus类</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#3%E3%80%81%E5%85%B3%E4%BA%8E%E4%BA%8B%E5%8A%A1%E7%9A%84%E5%AE%9A%E4%B9%89%E3%80%82%E5%AE%9A%E4%B9%89%E4%BA%86%E4%BA%8B%E5%8A%A1%E5%B8%B8%E7%94%A8%E7%9A%84%E5%B8%B8%E9%87%8F%E3%80%82%E5%92%8C%E8%8E%B7%E5%8F%96%E4%BA%8B%E5%8A%A1%E5%B1%9E%E6%80%A7%E8%8E%B7%E5%8F%96%E6%96%B9%E6%B3%95"><span class="toc-number">1.2.3.</span> <span class="toc-text">3、关于事务的定义。定义了事务常用的常量。和获取事务属性获取方法</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Spring%E4%BA%8B%E5%8A%A1%E7%9A%845%E4%B8%AA%E5%B1%9E%E6%80%A7"><span class="toc-number">1.3.</span> <span class="toc-text">Spring事务的5个属性</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#1%E3%80%81%E4%BC%A0%E6%92%AD%E8%A1%8C%E4%B8%BA"><span class="toc-number">1.3.1.</span> <span class="toc-text">1、传播行为</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#2%E3%80%81%E9%9A%94%E7%A6%BB%E7%BA%A7%E5%88%AB"><span class="toc-number">1.3.2.</span> <span class="toc-text">2、隔离级别</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#3%E3%80%81%E5%9B%9E%E6%BB%9A%E8%A7%84%E5%88%99"><span class="toc-number">1.3.3.</span> <span class="toc-text">3、回滚规则</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#4%E3%80%81%E4%BA%8B%E5%8A%A1%E8%B6%85%E6%97%B6"><span class="toc-number">1.3.4.</span> <span class="toc-text">4、事务超时</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#5%E3%80%81%E6%98%AF%E5%90%A6%E5%8F%AA%E8%AF%BB"><span class="toc-number">1.3.5.</span> <span class="toc-text">5、是否只读</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Spring-%E5%A3%B0%E6%98%8E%E5%BC%8F%E4%BA%8B%E5%8A%A1%E7%AE%A1%E7%90%86"><span class="toc-number">1.4.</span> <span class="toc-text">Spring 声明式事务管理</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%BC%80%E5%90%AF%E4%BA%8B%E5%8A%A1"><span class="toc-number">1.4.1.</span> <span class="toc-text">开启事务</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E4%BA%8B%E5%8A%A1%E7%9A%84%E4%BD%BF%E7%94%A8"><span class="toc-number">1.4.2.</span> <span class="toc-text">事务的使用</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Spring%E4%BA%8B%E5%8A%A1%E4%BD%BF%E7%94%A8%E7%9A%84%E6%B3%A8%E6%84%8F"><span class="toc-number">1.5.</span> <span class="toc-text">Spring事务使用的注意</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#Transactional-%E5%8F%AA%E8%83%BD%E5%BA%94%E7%94%A8%E5%88%B0-public-%E6%96%B9%E6%B3%95%E6%89%8D%E6%9C%89%E6%95%88"><span class="toc-number">1.5.1.</span> <span class="toc-text">@Transactional 只能应用到 public 方法才有效</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E9%81%BF%E5%85%8D-Spring-%E7%9A%84-AOP-%E7%9A%84%E8%87%AA%E8%B0%83%E7%94%A8%E9%97%AE%E9%A2%98"><span class="toc-number">1.5.2.</span> <span class="toc-text">避免 Spring 的 AOP 的自调用问题</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">1.6.</span> <span class="toc-text">总结</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%8F%82%E8%80%83"><span class="toc-number">1.7.</span> <span class="toc-text">参考</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>Recent Post</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2022/11/20/Java%E7%9A%84%E6%80%A7%E8%83%BD%E6%B5%8B%E8%AF%95%E5%B7%A5%E5%85%B7JMH/" title="Java热点代码的性能测试工具JMH"><img src="/img/00036.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Java热点代码的性能测试工具JMH"/></a><div class="content"><a class="title" href="/2022/11/20/Java%E7%9A%84%E6%80%A7%E8%83%BD%E6%B5%8B%E8%AF%95%E5%B7%A5%E5%85%B7JMH/" title="Java热点代码的性能测试工具JMH">Java热点代码的性能测试工具JMH</a><time datetime="2022-11-20T12:03:14.000Z" title="Created 2022-11-20 20:03:14">2022-11-20</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/10/10/MySQL%E4%B8%AD%E7%9A%84%E6%AD%BB%E9%94%81/" title="MySQL的死锁"><img src="/img/00035.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="MySQL的死锁"/></a><div class="content"><a class="title" href="/2022/10/10/MySQL%E4%B8%AD%E7%9A%84%E6%AD%BB%E9%94%81/" title="MySQL的死锁">MySQL的死锁</a><time datetime="2022-10-10T12:03:14.000Z" title="Created 2022-10-10 20:03:14">2022-10-10</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/06/20/Reactor%E6%A8%A1%E5%BC%8F%E4%B8%8EEventLoop/" title="Reactor模式与EventLoop"><img src="/img/00034.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Reactor模式与EventLoop"/></a><div class="content"><a class="title" href="/2022/06/20/Reactor%E6%A8%A1%E5%BC%8F%E4%B8%8EEventLoop/" title="Reactor模式与EventLoop">Reactor模式与EventLoop</a><time datetime="2022-06-20T12:03:14.000Z" title="Created 2022-06-20 20:03:14">2022-06-20</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/02/10/MySQL%E4%B8%AD%E7%9A%84%E9%94%81%E5%92%8CMVCC/" title="MySQL中的锁与MVCC"><img src="/img/00033.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="MySQL中的锁与MVCC"/></a><div class="content"><a class="title" href="/2022/02/10/MySQL%E4%B8%AD%E7%9A%84%E9%94%81%E5%92%8CMVCC/" title="MySQL中的锁与MVCC">MySQL中的锁与MVCC</a><time datetime="2022-02-10T12:03:14.000Z" title="Created 2022-02-10 20:03:14">2022-02-10</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/10/10/SpringBoot%E5%90%AF%E5%8A%A8%E7%9A%84%E8%BF%87%E7%A8%8B%E5%88%86%E6%9E%90/" title="SpringBoot启动的过程分析"><img src="/img/00032.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="SpringBoot启动的过程分析"/></a><div class="content"><a class="title" href="/2021/10/10/SpringBoot%E5%90%AF%E5%8A%A8%E7%9A%84%E8%BF%87%E7%A8%8B%E5%88%86%E6%9E%90/" title="SpringBoot启动的过程分析">SpringBoot启动的过程分析</a><time datetime="2021-10-10T12:03:14.000Z" title="Created 2021-10-10 20:03:14">2021-10-10</time></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2017 - 2022 By Hill</div><div class="framework-info"><span>Framework </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>Theme </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="Read Mode"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="Toggle Between Light And Dark Mode"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="Toggle between single-column and double-column"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="Setting"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="Table Of Contents"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="Back To Top"><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><div class="js-pjax"><script>if (!window.MathJax) {
+  window.MathJax = {
+    loader: {
+      source: {
+        '[tex]/amsCd': '[tex]/amscd'
+      }
+    },
+    tex: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"]],
+      tags: 'ams'
+    },
+    options: {
+      renderActions: {
+        findScript: [10, doc => {
+          for (const node of document.querySelectorAll('script[type^="math/tex"]')) {
+            const display = !!node.type.match(/; *mode=display/)
+            const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display)
+            const text = document.createTextNode('')
+            node.parentNode.replaceChild(text, node)
+            math.start = {node: text, delim: '', n: 0}
+            math.end = {node: text, delim: '', n: 0}
+            doc.math.push(math)
+          }
+        }, ''],
+        addClass: [200,() => {
+          document.querySelectorAll('mjx-container:not([display=\'true\']').forEach( node => {
+            const target = node.parentNode
+            if (!target.classList.contains('has-jax')) {
+              target.classList.add('mathjax-overflow')
+            }
+          })
+        }, '', false]
+      }
+    }
+  }
+  
+  const script = document.createElement('script')
+  script.src = 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js'
+  script.id = 'MathJax-script'
+  script.async = true
+  document.head.appendChild(script)
+} else {
+  MathJax.startup.document.state(0)
+  MathJax.texReset()
+  MathJax.typeset()
+}</script></div><canvas class="fireworks" mobile="false"></canvas><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/dist/fireworks.min.js"></script><script defer="defer" id="ribbon" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/dist/canvas-ribbon.min.js" size="150" alpha="0.6" zIndex="-1" mobile="false" data-click="false"></script><script defer="defer" id="fluttering_ribbon" mobile="true" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/dist/canvas-fluttering-ribbon.min.js"></script><script id="canvas_nest" defer="defer" color="0,0,255" opacity="0.7" zIndex="-1" count="99" mobile="false" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/dist/canvas-nest.min.js"></script><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/dist/activate-power-mode.min.js"></script><script>POWERMODE.colorful = true;
+POWERMODE.shake = true;
+POWERMODE.mobile = false;
+document.body.addEventListener('input', POWERMODE);
+</script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
